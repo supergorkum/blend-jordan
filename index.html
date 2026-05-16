@@ -901,41 +901,74 @@ function renderDays() {
   });
 }
 
-function sendConfirmEmail() {
+async function sendConfirmEmail() {
   const email = document.getElementById('confirmEmail').value.trim();
   if (!email || !email.includes('@')) { toast('Vul een geldig e-mailadres in'); return; }
 
-  const num       = document.getElementById('cNum').textContent;
-  const naam      = document.getElementById('cName').textContent;
+  const num         = document.getElementById('cNum').textContent;
+  const naam        = document.getElementById('cName').textContent;
   const behandeling = document.getElementById('cTreatment').textContent;
-  const datum     = document.getElementById('cDate').textContent;
-  const tijd      = document.getElementById('cTime').textContent;
-  const prijs     = document.getElementById('cPrice').textContent;
+  const datum       = document.getElementById('cDate').textContent;
+  const tijd        = document.getElementById('cTime').textContent;
+  const prijs       = document.getElementById('cPrice').textContent;
 
-  const subject = encodeURIComponent(`Afspraakbevestiging Blend by Jordan — ${num}`);
+  // Haal analysedata op voor het verhaal
+  const analyse = S.analysis || {};
+
+  toast('Even een mooi mailtje schrijven… ✍️');
+
+  let verhaal = '';
+  try {
+    const res = await call({
+      action: 'generateEmailNarrative',
+      naam,
+      behandeling,
+      datum,
+      tijd,
+      samenvatting: analyse.samenvatting || '',
+      wens:         analyse.wens || '',
+      uitleg:       analyse.uitleg || ''
+    });
+    verhaal = res.verhaal || '';
+  } catch {
+    // Fallback als API mislukt
+    verhaal = `Je behandeling — ${behandeling} — gaat er prachtig uitzien. We kijken ernaar uit je haar te transformeren en je het salon uit te laten lopen met een resultaat waar je helemaal blij van wordt.`;
+  }
+
+  const subject = encodeURIComponent(`Jouw afspraak bij Blend by Jordan — ${datum}`);
   const body = encodeURIComponent(
-`Hoi ${naam},
+`Hoi ${naam}! 👋
 
-Jouw afspraak bij Blend by Jordan is bevestigd! 🎉
+Geweldig dat je een afspraak hebt gemaakt bij Blend by Jordan. Ik ben Blendy, de digitale assistent van Jordan, en ik stuur je even alle details door — plus een klein voorproefje van wat je te wachten staat.
 
-────────────────────────
-Reserveringsnummer: ${num}
-Behandeling:        ${behandeling}
-Datum:              ${datum}
-Tijdstip:           ${tijd}
-Prijs:              ${prijs}
-────────────────────────
+✂️  JOUW AFSPRAAKDETAILS
+────────────────────────────────
+Reserveringsnummer:  ${num}
+Behandeling:         ${behandeling}
+Datum:               ${datum}
+Tijdstip:            ${tijd}
+Prijs:               ${prijs}
+────────────────────────────────
 
-We kijken ernaar uit je te zien!
+💫  WAT JE TE WACHTEN STAAT
 
-Met vriendelijke groet,
-Blend by Jordan
-@blend_x_jordan`
+${verhaal}
+
+📍  PRAKTISCH
+Neem dit reserveringsnummer mee: ${num}
+Kom gerust een paar minuten eerder zodat we rustig kunnen starten.
+
+Tot snel bij Blend by Jordan! 🌸
+
+Warme groet,
+Blendy — namens Jordan
+Instagram: @blend_x_jordan`
   );
 
   window.open(`mailto:${email}?subject=${subject}&body=${body}`);
   toast('✅ E-mailprogramma geopend');
 }
+
 
 async function goSlots() {
   if (!S.selDate) return;
