@@ -360,6 +360,23 @@
     .res-list-meta { font-size: 0.75rem; color: var(--mauve-soft); margin-top: 2px; }
     .res-list-arrow { color: var(--rose-light); font-size: 1rem; }
     .res-list-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--rose); margin-bottom: 10px; }
+
+    /* Omzet */
+    .omzet-total {
+      background: linear-gradient(135deg, var(--rose-dark), var(--rose));
+      border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 16px; color: white;
+    }
+    .omzet-total-label { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.82; margin-bottom: 6px; }
+    .omzet-total-amount { font-family: 'Cormorant Garamond', serif; font-size: 2.4rem; font-weight: 700; }
+    .omzet-total-sub { font-size: 0.78rem; opacity: 0.75; margin-top: 4px; }
+    .omzet-row {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 10px 0; border-bottom: 1px solid var(--border-soft); font-size: 0.85rem;
+    }
+    .omzet-row:last-child { border-bottom: none; }
+    .omzet-row-name { font-weight: 600; color: var(--rose-dark); }
+    .omzet-row-meta { font-size: 0.72rem; color: var(--mauve-soft); margin-top: 2px; }
+    .omzet-row-price { font-weight: 700; color: var(--rose); white-space: nowrap; margin-left: 12px; }
     .res-field { margin-bottom: 11px; }
     .res-field:last-child { margin-bottom: 0; }
     .res-field-lbl { font-size: 0.67rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--rose); margin-bottom: 3px; }
@@ -597,6 +614,7 @@
         <button class="atab on" onclick="switchTab('res',this)">📋 Reserveringen</button>
         <button class="atab" onclick="switchTab('week',this)">📅 Weekoverzicht</button>
         <button class="atab" onclick="switchTab('price',this)">💰 Prijslijst</button>
+        <button class="atab" onclick="switchTab('omzet',this)">📊 Omzet</button>
       </div>
       <div class="atab-content on" id="tab-res">
         <div class="week-nav" style="margin-bottom:12px">
@@ -628,6 +646,16 @@
           <div class="upload-text">Klik om een PDF te selecteren</div>
           <input type="file" id="pdfFile" accept=".pdf" style="display:none" onchange="doUpload(this)">
         </div>
+      </div>
+
+      <!-- TAB: OMZET -->
+      <div class="atab-content" id="tab-omzet">
+        <div class="week-nav" style="margin-bottom:16px">
+          <button class="week-nav-btn" onclick="shiftOmzet(-1)">‹</button>
+          <span class="week-lbl" id="omzetLbl"></span>
+          <button class="week-nav-btn" onclick="shiftOmzet(1)">›</button>
+        </div>
+        <div id="omzetContent"></div>
       </div>
     </div>
   </div>
@@ -1035,9 +1063,11 @@ function switchTab(name, btn) {
   if (name==='week') loadWeek();
   if (name==='price') loadPriceName();
   if (name==='res') { resListWeekOffset = 0; loadResList(); }
+  if (name==='omzet') loadOmzet();
 }
 
 let resListWeekOffset = 0;
+let omzetMonthOffset = 0;
 
 function shiftResList(delta) {
   resListWeekOffset += delta;
@@ -1245,6 +1275,76 @@ function renderCal(reservations, weekStart) {
     wrap.appendChild(col);
   });
   box.appendChild(wrap);
+}
+
+function shiftOmzet(delta) { omzetMonthOffset += delta; loadOmzet(); }
+
+async function loadOmzet() {
+  const box  = document.getElementById('omzetContent');
+  const lbl  = document.getElementById('omzetLbl');
+  if (!box) return;
+
+  const now = new Date();
+  const targetDate = new Date(now.getFullYear(), now.getMonth() + omzetMonthOffset, 1);
+  const year  = targetDate.getFullYear();
+  const month = targetDate.getMonth();
+
+  const maanden = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+  const isHuidig = omzetMonthOffset === 0;
+  lbl.textContent = `${maanden[month]} ${year}${isHuidig ? ' (huidig)' : ''}`;
+
+  box.innerHTML = '<p style="color:var(--mauve-soft);font-size:0.82rem">Laden…</p>';
+
+  try {
+    const res = await call({ action: 'getAllReservations' });
+    const all = res.reservations || [];
+
+    const maandRes = all.filter(r => {
+      const d = new Date(r.date);
+      return d.getFullYear() === year && d.getMonth() === month;
+    }).sort((a,b) => a.date === b.date ? a.startMinutes - b.startMinutes : a.date.localeCompare(b.date));
+
+    const totaal = maandRes.reduce((sum, r) => {
+      const p = parseFloat(String(r.analysis?.prijs || 0).replace(/[€\s]/g,'').replace(',','.')) || 0;
+      return sum + p;
+    }, 0);
+
+    if (maandRes.length === 0) {
+      box.innerHTML = `
+        <div class="omzet-total">
+          <div class="omzet-total-label">Verwachte omzet</div>
+          <div class="omzet-total-amount">€0,00</div>
+          <div class="omzet-total-sub">Geen reserveringen deze maand</div>
+        </div>`;
+      return;
+    }
+
+    box.innerHTML = `
+      <div class="omzet-total">
+        <div class="omzet-total-label">Verwachte omzet ${maanden[month]}</div>
+        <div class="omzet-total-amount">${fmtPrice(totaal)}</div>
+        <div class="omzet-total-sub">${maandRes.length} afspraak${maandRes.length !== 1 ? 'en' : ''}</div>
+      </div>
+      <div class="res-list-label">Afspraken deze maand</div>
+    `;
+
+    maandRes.forEach(r => {
+      const prijs = parseFloat(String(r.analysis?.prijs || 0).replace(/[€\s]/g,'').replace(',','.')) || 0;
+      const row = document.createElement('div');
+      row.className = 'omzet-row';
+      row.innerHTML = `
+        <div>
+          <div class="omzet-row-name">${r.name}</div>
+          <div class="omzet-row-meta">${fmtDate(r.date)} · ${fmt(r.startMinutes)} · ${r.analysis?.behandeling || ''}</div>
+        </div>
+        <div class="omzet-row-price">${fmtPrice(prijs)}</div>
+      `;
+      box.appendChild(row);
+    });
+
+  } catch {
+    box.innerHTML = '<p style="color:var(--mauve-soft);font-size:0.82rem">Kon omzet niet laden.</p>';
+  }
 }
 
 async function loadPriceName() {
