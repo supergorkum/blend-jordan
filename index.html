@@ -541,9 +541,11 @@
         <h2>Afspraak bevestigd!</h2>
         <p>We kijken ernaar uit je te zien bij Blend by Jordan</p>
       </div>
+      <input type="hidden" id="cNumRaw" value="">
       <div class="res-ticket">
-        <div class="ticket-label">Jouw reserveringsnummer</div>
-        <div class="ticket-number" id="cNum"></div>
+        <div class="ticket-label">Jouw reserveringscode</div>
+        <div class="ticket-number" id="cNum" style="font-size:1.9rem;letter-spacing:0.12em"></div>
+        <div style="font-size:0.65rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.65);margin-top:6px">Neem dit nummer mee naar de salon</div>
       </div>
       <div class="detail-row"><span class="detail-key">Naam</span><span class="detail-val" id="cName"></span></div>
       <div class="detail-row"><span class="detail-key">Behandeling</span><span class="detail-val" id="cTreatment"></span></div>
@@ -896,7 +898,7 @@ async function sendConfirmEmail() {
   const email = document.getElementById('confirmEmail').value.trim();
   if (!email || !email.includes('@')) { toast('Vul een geldig e-mailadres in'); return; }
 
-  const num         = document.getElementById('cNum').textContent;
+  const num         = document.getElementById('cNumRaw').value || document.getElementById('cNum').textContent;
   const naam        = document.getElementById('cName').textContent;
   const behandeling = document.getElementById('cTreatment').textContent;
   const datum       = document.getElementById('cDate').textContent;
@@ -999,14 +1001,17 @@ async function bookSlot() {
   if (!S.selSlot) return;
   try {
     const res = await call({ action:'saveReservation', name:S.name, analysis:S.analysis, date:S.selDate, startMinutes:S.selSlot });
-    document.getElementById('cNum').textContent = res.number;
+    const num = res.number || (res.reservation && res.reservation.number) || '——';
+    const displayNum = num.startsWith('BL') ? 'BLEND·' + num.slice(2) : num.startsWith('BJ') ? 'BLEND·' + num.slice(2) : num;
+    document.getElementById('cNum').textContent = displayNum;
+    document.getElementById('cNumRaw').value = num;
     document.getElementById('cName').textContent = S.name;
     document.getElementById('cTreatment').textContent = S.analysis.behandeling;
     document.getElementById('cDate').textContent = fmtDate(S.selDate);
     document.getElementById('cTime').textContent = fmt(S.selSlot);
     document.getElementById('cPrice').textContent = fmtPrice(S.analysis.prijs);
     show('s-confirm'); progress(100);
-  } catch { toast('Fout bij opslaan. Probeer opnieuw.'); }
+  } catch (e) { toast('Fout bij opslaan: ' + e.message); }
 }
 
 function reset() {
