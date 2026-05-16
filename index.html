@@ -599,6 +599,11 @@
         <button class="atab" onclick="switchTab('price',this)">💰 Prijslijst</button>
       </div>
       <div class="atab-content on" id="tab-res">
+        <div class="week-nav" style="margin-bottom:12px">
+          <button class="week-nav-btn" onclick="shiftResList(-1)">‹</button>
+          <span class="week-lbl" id="resWeekLbl"></span>
+          <button class="week-nav-btn" onclick="shiftResList(1)">›</button>
+        </div>
         <div id="resList" style="margin-bottom:14px"></div>
         <div style="font-size:0.75rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--mauve-soft);margin-bottom:8px">Zoek op nummer</div>
         <div class="search-row">
@@ -1029,41 +1034,48 @@ function switchTab(name, btn) {
   document.getElementById('tab-'+name).classList.add('on');
   if (name==='week') loadWeek();
   if (name==='price') loadPriceName();
-  if (name==='res') loadResList();
+  if (name==='res') { resListWeekOffset = 0; loadResList(); }
+}
+
+let resListWeekOffset = 0;
+
+function shiftResList(delta) {
+  resListWeekOffset += delta;
+  loadResList();
 }
 
 async function loadResList() {
   const box = document.getElementById('resList');
+  const lbl = document.getElementById('resWeekLbl');
   if (!box) return;
-  box.innerHTML = '<div class="res-list-label">Aankomende afspraken</div><p style="color:var(--mauve-soft);font-size:0.82rem">Laden…</p>';
+
+  // Calculate week start based on offset
+  const weekStart = getMonday(new Date());
+  weekStart.setDate(weekStart.getDate() + resListWeekOffset * 7);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 4);
+
+  const mons = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+  const isThisWeek = resListWeekOffset === 0;
+  lbl.textContent = isThisWeek
+    ? 'Deze week'
+    : `${weekStart.getDate()} ${mons[weekStart.getMonth()]} — ${weekEnd.getDate()} ${mons[weekEnd.getMonth()]}`;
+
+  box.innerHTML = '<p style="color:var(--mauve-soft);font-size:0.82rem">Laden…</p>';
 
   try {
-    // Get next 30 days of reservations via week calls
-    const today = new Date().toISOString().split('T')[0];
-    const allRes = [];
-
-    // Fetch 6 weeks ahead
-    for (let w = 0; w < 6; w++) {
-      const weekStart = new Date();
-      weekStart.setDate(weekStart.getDate() + (w * 7) - weekStart.getDay() + (weekStart.getDay() === 0 ? -6 : 1));
-      const ws = weekStart.toISOString().split('T')[0];
-      const res = await call({ action:'getWeekReservations', weekStart: ws });
-      if (res.reservations) allRes.push(...res.reservations);
-    }
-
-    // Filter future, sort by date+time, deduplicate
-    const seen = new Set();
-    const upcoming = allRes
-      .filter(r => r.date >= today && !seen.has(r.number) && seen.add(r.number))
+    const ws = weekStart.toISOString().split('T')[0];
+    const res = await call({ action:'getWeekReservations', weekStart: ws });
+    const reservations = (res.reservations || [])
       .sort((a, b) => a.date === b.date ? a.startMinutes - b.startMinutes : a.date.localeCompare(b.date));
 
-    if (upcoming.length === 0) {
-      box.innerHTML = '<div class="res-list-label">Aankomende afspraken</div><p style="color:var(--mauve-soft);font-size:0.82rem">Geen aankomende afspraken.</p>';
+    if (reservations.length === 0) {
+      box.innerHTML = `<p style="color:var(--mauve-soft);font-size:0.85rem">Geen afspraken deze week.</p>`;
       return;
     }
 
-    box.innerHTML = `<div class="res-list-label">Aankomende afspraken (${upcoming.length})</div>`;
-    upcoming.forEach(r => {
+    box.innerHTML = `<div class="res-list-label">${reservations.length} afspraak${reservations.length !== 1 ? 'en' : ''}</div>`;
+    reservations.forEach(r => {
       const item = document.createElement('div');
       item.className = 'res-list-item';
       item.innerHTML = `
@@ -1076,12 +1088,11 @@ async function loadResList() {
       item.onclick = () => {
         document.getElementById('resSearch').value = r.number;
         lookupRes();
-        item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       };
       box.appendChild(item);
     });
-  } catch (e) {
-    box.innerHTML = '<div class="res-list-label">Aankomende afspraken</div><p style="color:var(--mauve-soft);font-size:0.82rem">Kon afspraken niet laden.</p>';
+  } catch {
+    box.innerHTML = '<p style="color:var(--mauve-soft);font-size:0.82rem">Kon afspraken niet laden.</p>';
   }
 }
 
