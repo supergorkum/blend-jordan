@@ -522,6 +522,11 @@
     <div class="card">
       <h2>Kies jouw voorkeursdag</h2>
       <p>Selecteer een dag die voor jou goed uitkomt. Volle dagen zijn niet meer beschikbaar.</p>
+      <div class="week-nav" style="margin:14px 0 10px">
+        <button class="week-nav-btn" id="btnPrevWeek" onclick="shiftDayWeek(-1)">‹</button>
+        <span class="week-lbl" id="dayWeekLbl"></span>
+        <button class="week-nav-btn" onclick="shiftDayWeek(1)">›</button>
+      </div>
       <div class="day-grid" id="dayGrid"></div>
       <button class="btn btn-primary" id="btnDay" onclick="goSlots()" disabled>Tijdslot kiezen →</button>
     </div>
@@ -554,7 +559,18 @@
       <div class="detail-row"><span class="detail-key">Datum</span><span class="detail-val" id="cDate"></span></div>
       <div class="detail-row"><span class="detail-key">Tijdstip</span><span class="detail-val" id="cTime"></span></div>
       <div class="detail-row"><span class="detail-key">Prijs</span><span class="detail-val" id="cPrice"></span></div>
-      <button class="btn btn-ghost" onclick="reset()" style="margin-top:18px">Nieuwe reservering</button>
+
+      <div style="margin-top:20px;padding:16px;background:var(--blush);border-radius:14px">
+        <div class="label-caps" style="margin-bottom:10px">📧 Bevestiging per mail ontvangen</div>
+        <div style="display:flex;gap:8px">
+          <input type="email" id="confirmEmail" placeholder="jouw@email.nl"
+            style="flex:1;padding:11px 16px;border:2px solid var(--border);border-radius:50px;font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;transition:border-color 0.2s"
+            onfocus="this.style.borderColor='var(--rose)'" onblur="this.style.borderColor='var(--border)'">
+          <button class="btn btn-primary btn-sm" onclick="sendConfirmEmail()" style="white-space:nowrap">Stuur →</button>
+        </div>
+      </div>
+
+      <button class="btn btn-ghost" onclick="reset()" style="margin-top:12px">Nieuwe reservering</button>
     </div>
   </div>
 
@@ -667,7 +683,7 @@
 // ════════════════════════════════════════════════════════
 const API = '/.netlify/functions/api';
 
-let S = { name:'', answers:{}, qIdx:0, analysis:null, avail:null, selDate:null, selSlot:null };
+let S = { name:'', answers:{}, qIdx:0, analysis:null, avail:null, selDate:null, selSlot:null, dayWeekOffset:0 };
 
 // Chat state
 let adminWeek = null;
@@ -821,29 +837,104 @@ async function doAnalyze() {
 //  PLANNING
 // ════════════════════════════════════════════════════════
 async function goSchedule() {
+  S.dayWeekOffset = 0;
+  S.selDate = null;
   show('s-day');
-  document.getElementById('dayGrid').innerHTML = '<p style="color:var(--mauve-soft)">Beschikbaarheid controleren…</p>';
+  await loadDayWeek();
+}
+
+function shiftDayWeek(delta) {
+  // Don't go before current week
+  if (S.dayWeekOffset + delta < 0) return;
+  S.dayWeekOffset += delta;
+  S.selDate = null;
+  document.getElementById('btnDay').disabled = true;
+  loadDayWeek();
+}
+
+async function loadDayWeek() {
+  const grid = document.getElementById('dayGrid');
+  const lbl  = document.getElementById('dayWeekLbl');
+  const prevBtn = document.getElementById('btnPrevWeek');
+  grid.innerHTML = '<p style="color:var(--mauve-soft)">Beschikbaarheid controleren…</p>';
+
+  // Calculate start of the target week (Monday)
+  const monday = getMonday(new Date());
+  monday.setDate(monday.getDate() + S.dayWeekOffset * 7);
+  const friday = new Date(monday);
+  friday.setDate(monday.getDate() + 4);
+
+  const mons = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
+  lbl.textContent = S.dayWeekOffset === 0
+    ? 'Deze week'
+    : `${monday.getDate()} ${mons[monday.getMonth()]} — ${friday.getDate()} ${mons[friday.getMonth()]}`;
+
+  prevBtn.style.opacity = S.dayWeekOffset === 0 ? '0.3' : '1';
+  prevBtn.style.pointerEvents = S.dayWeekOffset === 0 ? 'none' : 'auto';
+
   try {
-    const res = await call({ action:'checkAvailability', durationMinutes:S.analysis.duur });
+    const startDate = monday.toISOString().split('T')[0];
+    const res = await call({ action:'checkAvailability', durationMinutes:S.analysis.duur, startDate });
     S.avail = res.availability;
     renderDays();
-  } catch { document.getElementById('dayGrid').innerHTML = '<p style="color:red">Fout bij laden. Probeer opnieuw.</p>'; }
+  } catch { grid.innerHTML = '<p style="color:red">Fout bij laden. Probeer opnieuw.</p>'; }
 }
 
 function renderDays() {
   const grid = document.getElementById('dayGrid');
   grid.innerHTML = '';
   const dayNL = ['zo','Ma','Di','Wo','Do','Vr','Za'];
+  // Filter out past days
+  const today = new Date().toISOString().split('T')[0];
   Object.entries(S.avail).forEach(([ds, info]) => {
     const d = new Date(ds + 'T12:00:00');
+    const isPast = ds < today;
     const card = document.createElement('div');
-    card.className = 'day-card' + (!info.available ? ' full' : '');
-    card.innerHTML = `<div class="day-name">${dayNL[d.getDay()]}</div><div class="day-date">${fmtDateShort(ds)}</div>${!info.available ? '<div class="day-full-badge">Vol 🚫</div>' : ''}`;
-    if (info.available) {
+    card.className = 'day-card' + ((!info.available || isPast) ? ' full' : '');
+    card.innerHTML = `<div class="day-name">${dayNL[d.getDay()]}</div><div class="day-date">${fmtDateShort(ds)}</div>${!info.available || isPast ? '<div class="day-full-badge">${isPast ? "Verleden" : "Vol 🚫"}</div>' : ''}`;
+    // Fix template literal issue
+    card.querySelector('.day-full-badge') && (card.querySelector('.day-full-badge').textContent = isPast ? 'Verleden' : 'Vol 🚫');
+    if (info.available && !isPast) {
       card.onclick = () => { grid.querySelectorAll('.day-card').forEach(c => c.classList.remove('picked')); card.classList.add('picked'); S.selDate = ds; document.getElementById('btnDay').disabled = false; };
     }
     grid.appendChild(card);
   });
+}
+
+function sendConfirmEmail() {
+  const email = document.getElementById('confirmEmail').value.trim();
+  if (!email || !email.includes('@')) { toast('Vul een geldig e-mailadres in'); return; }
+
+  const num       = document.getElementById('cNum').textContent;
+  const naam      = document.getElementById('cName').textContent;
+  const behandeling = document.getElementById('cTreatment').textContent;
+  const datum     = document.getElementById('cDate').textContent;
+  const tijd      = document.getElementById('cTime').textContent;
+  const prijs     = document.getElementById('cPrice').textContent;
+
+  const subject = encodeURIComponent(`Afspraakbevestiging Blend by Jordan — ${num}`);
+  const body = encodeURIComponent(
+`Hoi ${naam},
+
+Jouw afspraak bij Blend by Jordan is bevestigd! 🎉
+
+────────────────────────
+Reserveringsnummer: ${num}
+Behandeling:        ${behandeling}
+Datum:              ${datum}
+Tijdstip:           ${tijd}
+Prijs:              ${prijs}
+────────────────────────
+
+We kijken ernaar uit je te zien!
+
+Met vriendelijke groet,
+Blend by Jordan
+@blend_x_jordan`
+  );
+
+  window.open(`mailto:${email}?subject=${subject}&body=${body}`);
+  toast('✅ E-mailprogramma geopend');
 }
 
 async function goSlots() {
