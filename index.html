@@ -879,14 +879,17 @@ function startBlendy() {
   S.name = name;
   chatHistory = [];
 
-  show('s-chat');
+  // Chat scherm tonen (heeft geen .screen class, dus handmatig)
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('s-chat').classList.add('active');
+  window.scrollTo({ top:0, behavior:'smooth' });
   progress(15);
 
-  const inp  = document.getElementById('chatInp');
-  const send = document.getElementById('chatSend');
+  const inp  = document.getElementById('chatInput');
+  const send = document.getElementById('chatSendBtn');
   inp.disabled  = true;
   send.disabled = true;
-  document.getElementById('chatMsgs').innerHTML = '';
+  document.getElementById('chatMessages').innerHTML = '';
   blendyTyping(true);
 
   callBlendy([{ role:'user', content: `Hoi! Mijn naam is ${name}.` }]).then(reply => {
@@ -909,13 +912,16 @@ function startBlendy() {
 function backToWelcome() {
   chatHistory = [];
   blendyBusy = false;
+  document.getElementById('s-chat').classList.remove('active');
   show('s-welcome');
   progress(0);
 }
 
+function closeChat() { backToWelcome(); }
+
 async function sendChat() {
-  const inp  = document.getElementById('chatInp');
-  const send = document.getElementById('chatSend');
+  const inp  = document.getElementById('chatInput');
+  const send = document.getElementById('chatSendBtn');
   const msg  = inp.value.trim();
   if (!msg || blendyBusy) return;
   inp.value = '';
@@ -969,7 +975,7 @@ function parseReply(reply) {
 }
 
 function addBubble(type, text) {
-  const msgs = document.getElementById('chatMsgs');
+  const msgs = document.getElementById('chatMessages');
   const row  = document.createElement('div');
   row.className = 'brow' + (type === 'u' ? ' u' : '');
   row.innerHTML  = type === 'b'
@@ -980,7 +986,7 @@ function addBubble(type, text) {
 }
 
 function blendyTyping(on) {
-  const msgs = document.getElementById('chatMsgs');
+  const msgs = document.getElementById('chatMessages');
   const ex   = msgs.querySelector('.typing');
   if (on && !ex) {
     const row = document.createElement('div');
@@ -1122,9 +1128,10 @@ async function deleteRes(number) {
   try {
     const res = await call({ action:'deleteReservation', number });
     if (res.success) {
-      document.getElementById('resResult').innerHTML = `<p style="color:var(--success)">✅ Reservering ${number} verwijderd.</p>`;
+      document.getElementById('resResult').innerHTML = '';
       document.getElementById('resSearch').value = '';
-      toast('Reservering verwijderd');
+      toast('✅ Reservering ' + number + ' verwijderd');
+      loadResList();
     }
   } catch { toast('Fout bij verwijderen'); }
 }
