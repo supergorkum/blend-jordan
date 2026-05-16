@@ -111,7 +111,7 @@ ${DEFAULT_PRICE_LIST}
 Geef ALLEEN dit JSON object terug, geen andere tekst:
 {"samenvatting":"situatie van ${name} in 1-2 zinnen","wens":"wens in 1 zin","behandeling":"exacte naam uit prijslijst","prijs":0.00,"duur":0,"uitleg":"uitleg in 1-2 zinnen"}`;
 
-      const raw = await callClaude({ model: 'claude-sonnet-4-6', max_tokens: 500, messages: [{ role:'user', content: prompt }] });
+      const raw = await callClaude({ model: 'claude-haiku-4-5-20251001', max_tokens: 500, messages: [{ role:'user', content: prompt }] });
       let analysis;
       try { analysis = JSON.parse(raw.replace(/```json|```/g,'').trim()); }
       catch (e) {
@@ -237,7 +237,7 @@ WANNEER KLAAR — voeg toe op nieuwe regel:
 PRIJSLIJST:
 ${DEFAULT_PRICE_LIST}`;
 
-      const reply = await callClaude({ model: 'claude-sonnet-4-6', max_tokens: 600, system: sys, messages });
+      const reply = await callClaude({ model: 'claude-haiku-4-5-20251001', max_tokens: 600, system: sys, messages });
       return { statusCode: 200, headers, body: JSON.stringify({ reply }) };
     }
 
