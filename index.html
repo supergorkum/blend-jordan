@@ -48,16 +48,10 @@
     }
 
     /* ── HEADER ────────────────────────────────────────── */
-    .site-header { text-align: center; padding: 28px 20px 12px; position: relative; z-index: 1; }
+    .site-header { text-align: center; padding: 20px 20px 10px; position: relative; z-index: 1; }
+    .site-header img { height: 88px; width: 88px; object-fit: cover; display: block; margin: 0 auto 6px; border-radius: 20px; box-shadow: 0 4px 24px rgba(201,75,122,0.28), 0 1px 4px rgba(0,0,0,0.08); }
     .logo-wrap { display: inline-flex; align-items: center; gap: 10px; }
-    .logo-dot {
-      width: 38px; height: 38px;
-      background: linear-gradient(135deg, var(--rose), var(--neon));
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 18px var(--neon-glow);
-      font-size: 1.1rem;
-    }
+    .logo-dot { width: 38px; height: 38px; background: linear-gradient(135deg, var(--rose), var(--neon)); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 18px var(--neon-glow); font-size: 1.1rem; }
     .logo-text { font-family: 'Cormorant Garamond', serif; font-size: 1.65rem; font-weight: 600; color: var(--rose-dark); line-height: 1; }
     .logo-text em { font-style: italic; color: var(--neon); text-shadow: 0 0 24px var(--neon-glow); }
     .tagline { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mauve-soft); margin-top: 6px; }
@@ -430,10 +424,7 @@
 
 <!-- HEADER -->
 <header class="site-header">
-  <div class="logo-wrap">
-    <div class="logo-dot">✂️</div>
-    <div class="logo-text"><em>blend</em> by Jordan</div>
-  </div>
+  <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCADhAOEDASIAAhEBAxEB/8QAGwABAQADAQEBAAAAAAAAAAAAAAYBBAUDAgf/xAA4EAABAwMCAgkDAgMJAAAAAAAAAQIDBAURBiESMQcTFiJBUVaU0xRhgRUyIyRxMzZCcoKRoaKx/8QAGQEBAQEBAQEAAAAAAAAAAAAAAAECAwUH/8QAKhEBAAIBAgUDBAIDAAAAAAAAAAERAgMSFDFhkdETIaEEQbHBUfAjMkL/2gAMAwEAAhEDEQA/AL4AHjvroAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABJ6wnbDrPSjJqhYaWV9YlQnWKxj2tp1VOLC7oi7pnku5Yi5py1tX0sd3WI7zSsBwNErdV0jEt5WV1Qqz8Czf2iw9Y/qlfnfi6vgznfz3ya/RRNNU9G2nqiolkmmloInySSOVznuVu6qq7qv3LONW54fUb8sYrnF/jyqML5GCL05LHU6y1XRVNU7iiutMtKxZVy3FNFIrWpnZqqjlVE2XK55mx0jVNTa0teoYJ5WQWupSWuja5UbJTPxFIrk5LwI/j35cCl2e9M8V/jnUr2ifxNT5Vhk5tbhun7grFxiKoVFRf82F/wDCK0NcK5lToeJaueSO66adPVtkkV/WSxtp1bJvyd/Eeir/AIspnOEwjC4NT6qNPPHGY5/uYj9v0YyqKhgj7M+Wj17e9PVMkkkFWkV2o+scq8MezJI25Xk2RrVwmyJIv5zEW66ur6c4xXOaWABK3qaZvShpunbLIkMlvr3vjRy8LnNWBGqqclVOJ2PLK+YiLXW1fTiJ6xHeaVZgkrjLLWdINXap5pfo4bB1zI2vVqJI+Z7Vfsv7kRiYXm3K4xlTWt1yrrj0HNu1VUvdXS6fdM+dO65ZOoVePKclymcp4mtjhxcbsorlfxS3BFaQqq6a/wBvjpppZ7c7T8UlaquV7G1WWcGFXk9zVkVyJ5NVeaZ1NSy1ParVjIqyog+n0xFVQLHIqdVMj6hUe3wz3G580REXKbDZ70zP1senGdfevi1+DQsVa+r03b7lU445qKKeXhTxcxHLhPypyuja41lw0079RVFrqStqqSowue9HM9E/68K/kzt9pd418Zyxx/mL/HlSAi6aoqKDXlztNXPJLR3aJtdQte5VSOSJ7Y52N8kwsT8J4q4tC5Y0ujrepftymv7+QAGXYAAAAAAAAAAAmtTU9U/Welq2Klnlp6R9W6okjYrkiR0HC1Vxvuu2xSgsTUuWrp+pjt6xPabTuiLfX23TElPXsVkj6mqmhgR3GsMT5Xujj28mqiYTlyTkePRjBWW7RNgtFbR1EFTT25jZ0exUSN7UanCq8lXdeXkpUAs5Xbnh9NGE4zE8or8eElp6nqqHVOqKqegqFZWXSmfSu6tVRzfp4onvRcbI1UdnlsilBdKSnuEctvq4lkp6mllhlbwqrVa7CKiry3TP+xugTlc2unoRhjOPOJv5m0/ZaGvoej9lsrXvqK2Chkge/GXSuRrmo7752X8nB0XZLmyfRk9TSyU7LPp1aWp61OFeve2BOBE8cdU7K8t0TKl8ZLvn3Yn6TGZxm/8AWviYn9MElqujq/1/T+pLfS1E81JWupaiNka8S0krVa9cKnJr0ZJ/RNvIrQZxmpddbSjVxqf7QSt0hkqOlSxSxMV7KO11q1Dk5R9Y+BGIq+Cu4XYTx4V8lKoJtnHjuoiaXV0vUiI/iYntNpevoqun13UXlKaaalnsn0rViYr1SVkrn8Kom/eR+y8u6uV5Z16Cy3C3dDSaflh6y4RWJ1KscXezL1Kt4Uxz3XBYAu9y4XHdlN87+eaMsNFc6TVVil+kqIqOTTiU9WqM7qVEbolYj/JyNWXCr90PDUVuucmptUT01vnnbW6dioqZUTDZJuKo7vEuyY42qqrsiKXQL6k3bHBY7Nt/e/inLoKR9Bpy32yRXPfFBDSvdG1VReFrWuXlsmEXdTm6Woau26t1PE+Gf6Ksnhrqedze657okZK1FTxRY2r/AKv6lMCbubtOhF4zH/Pik3qW0S3KS011KkjKq2Xdk7duFXROdwSt3TdqscrvvwoUgBJm4prDSjDKco+4ACOoAAAAAAAAeVbFLPRzQwVUlJK9itZPG1rnRr4ORHIrVVPuioeoCTFxSZTT2ocb6+vHsqP4TPZ7UPr67+yo/hKUGt8uHDYde8+U12e1D6+u/sqP4R2e1D6+u/sqP4SlA3ycNh17z5TPZ7UPr27+yo/hHZ7UPr27+yo/hKYDfJw2HXvPlNdntQ+vrv7Kj+EdntQ+vrv7Kj+EpQN8nDYde8+Uz2e1D69u/sqP4R2e1D69u/sqP4SmA3ycNh17z5TPZ7UPr27+yo/hM9ntQ+vrv7Kj+EpQN8nDYde8+U12e1D6+u/sqP4THZ7UPr27+yo/hKYDfJw2HXvPlM9ntQ+vbv7Kj+Ez2e1D6+u/sqP4SlA3ycNh17z5TXZ7UPr67+yo/hHZ7UPr67+yo/hKUDfJw2HXvPlNdntQ+vrv7Kj+EdntQ5/v7d/ZUfwlKBvk4bDr3ny8LfDNT0UUFTWSVkzG4fPIxrXSL5qjURqfhEPcAy7xFRQAAoAAAAAAAAAAAAAGlXur2So6lj6yNG8aty1M8K7s38XIqYXknCuVTKG6Azljuiran86ypgbtJCxqNmdlEV6rsrkTHgqIvhsq88IeTEuDqeZirKydWbPXg4Ucqr+1Mbp/X7Z3ydAFtnZ1c6d1wWJqq1zHJOqORmF7nCu6c9lXH333PfFZ+oZzin48fuTlweWM/u8c/jxNoCzZ1aEba51G1sjpmytmYiuRWZe3LeJcYwifu2+2y8j7/nW3CZ6tc6mTKsajm97DGYRExlMrx75/HJTcAs2dXPRLulCsapEtVx7ScScPDjPlyz3cYzjfOdzYYk76qOVVkZGsWXRqqYa7bZf+fE2ALWMK+7VxVpcf3K6nVqqvJETZMJ5quUVc/f7JnaAIsRQAA0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD//Z" alt="Blend by Jordan" style="height:80px;width:80px;object-fit:cover;display:block;margin:0 auto 4px;border-radius:16px;box-shadow:0 4px 20px rgba(201,75,122,0.25)">
   <div class="tagline">Kapsalon · Online Reserveren</div>
 </header>
 
