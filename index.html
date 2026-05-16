@@ -655,12 +655,12 @@
         <div class="cal-scroll" id="calContainer"></div>
       </div>
       <div class="atab-content" id="tab-price">
-        <p style="margin-bottom:14px">Upload hier de actuele prijslijst als PDF. De AI gebruikt deze direct bij het bepalen van behandelingen en prijzen.</p>
+        <p style="margin-bottom:14px">Upload hier de actuele prijslijst. De AI gebruikt deze direct bij het bepalen van behandelingen en prijzen. Je kunt een <strong>PDF</strong> of <strong>Excel (.xlsx)</strong> uploaden.</p>
         <div id="priceStatus" style="margin-bottom:10px"></div>
         <div class="upload-zone" onclick="document.getElementById('pdfFile').click()">
           <div class="upload-icon">📄</div>
-          <div class="upload-text">Klik om een PDF te selecteren</div>
-          <input type="file" id="pdfFile" accept=".pdf" style="display:none" onchange="doUpload(this)">
+          <div class="upload-text">Klik om een PDF of Excel bestand te selecteren</div>
+          <input type="file" id="pdfFile" accept=".pdf,.xlsx,.xls" style="display:none" onchange="doUpload(this)">
         </div>
       </div>
 
@@ -1229,16 +1229,71 @@ async function lookupRes() {
   } catch { box.innerHTML = '<p style="color:red">Fout bij ophalen.</p>'; }
 }
 
+// ── BEHANDELINGENLIJST ───────────────────────────────────────────
+const TREATMENTS = [
+  { naam: "Highlights XS (faceframe) zonder toner",              prijs: 68.45,  duur: 75  },
+  { naam: "Highlights XS (faceframe) incl toner",                prijs: 68.45,  duur: 75  },
+  { naam: "Knippen + Highlights XS (faceframe) zonder toner",    prijs: 106.35, duur: 95  },
+  { naam: "Knippen + Highlights XS (faceframe) incl toner",      prijs: 106.35, duur: 95  },
+  { naam: "Highlights S (scalp) zonder toner",                    prijs: 98.80,  duur: 85  },
+  { naam: "Highlights S (scalp) incl toner",                      prijs: 128.80, duur: 135 },
+  { naam: "Knippen + Highlights S (scalp) zonder toner",          prijs: 136.70, duur: 115 },
+  { naam: "Knippen + Highlights S (scalp) incl toner",            prijs: 166.70, duur: 190 },
+  { naam: "Highlights M (fullhead) zonder toner",                 prijs: 122.50, duur: 110 },
+  { naam: "Highlights M (fullhead) incl toner",                   prijs: 152.50, duur: 160 },
+  { naam: "Knippen + Highlights M (fullhead) zonder toner",       prijs: 160.40, duur: 140 },
+  { naam: "Knippen + Highlights M (fullhead) incl toner",         prijs: 190.40, duur: 190 },
+  { naam: "Highlights L (van aanzet tot punt) zonder toner",      prijs: 147.50, duur: 125 },
+  { naam: "Highlights L (van aanzet tot punt) incl toner",        prijs: 177.50, duur: 175 },
+  { naam: "Knippen + Highlights L (lengten en punten) zonder toner", prijs: 183.40, duur: 155 },
+  { naam: "Knippen + Highlights L (lengten en punten) incl toner",   prijs: 213.40, duur: 205 },
+  { naam: "Balayage",                                              prijs: 145.00, duur: 155 },
+  { naam: "Balayage en knippen",                                   prijs: 182.90, duur: 185 },
+];
+
+function treatmentSelect(id, selected = '') {
+  const opts = TREATMENTS.map(t =>
+    `<option value="${t.naam}" data-prijs="${t.prijs}" data-duur="${t.duur}" ${t.naam === selected ? 'selected' : ''}>${t.naam} — €${t.prijs.toFixed(2).replace('.',',')} / ${t.duur} min</option>`
+  ).join('');
+  return `<select id="${id}" onchange="calcTotals()" style="width:100%;padding:9px 12px;border:2px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--mauve);background:var(--blush);outline:none;margin-bottom:6px">
+    <option value="">— Kies behandeling —</option>${opts}
+  </select>`;
+}
+
+let resEditorRows = 1;
+let currentResNumber = '';
+
 function renderResDetail(r, box) {
+  currentResNumber = r.number;
+  // Bepaal huidige behandelingen (kan een array zijn na correctie)
+  const behs = Array.isArray(r.analysis?.behandelingen) ? r.analysis.behandelingen : [{ naam: r.analysis?.behandeling || '', prijs: r.analysis?.prijs || 0, duur: r.analysis?.duur || 0 }];
+  resEditorRows = behs.length || 1;
+
+  const selectRows = behs.map((b, i) => `
+    <div class="behandeling-row" id="brow-${i}" style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+      ${treatmentSelect(`bsel-${i}`, b.naam)}
+      ${i > 0 ? `<button onclick="removeBehandeling(${i})" style="background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--warn);flex-shrink:0" title="Verwijder">✕</button>` : '<div style="width:26px"></div>'}
+    </div>`).join('');
+
   box.innerHTML = `
     <div class="res-detail">
       <div class="res-field"><div class="res-field-lbl">Naam</div><div class="res-field-val">${r.name}</div></div>
       <div class="res-field"><div class="res-field-lbl">Nummer</div><div class="res-field-val">${r.number}</div></div>
       <div class="res-field"><div class="res-field-lbl">Datum &amp; Tijd</div><div class="res-field-val">${fmtDate(r.date)} om ${fmt(r.startMinutes)}</div></div>
-      <div class="res-field"><div class="res-field-lbl">Behandeling</div><div class="res-field-val" style="font-weight:700;color:var(--rose-dark)">${r.analysis?.behandeling||'Onbekend'}</div></div>
-      <div class="res-field"><div class="res-field-lbl">Prijs</div><div class="res-field-val">${fmtPrice(r.analysis?.prijs||0)}</div></div>
+
       <div class="res-field">
-        <div class="res-field-lbl">Behandelingsduur</div>
+        <div class="res-field-lbl">Behandeling(en)
+          <button onclick="addBehandeling()" style="margin-left:8px;background:none;border:1.5px solid var(--rose);color:var(--rose);border-radius:20px;padding:1px 10px;font-size:0.72rem;font-weight:700;cursor:pointer">+ Toevoegen</button>
+        </div>
+        <div id="behandelingRows">${selectRows}</div>
+        <div style="margin-top:8px;display:flex;gap:16px;align-items:center">
+          <div style="font-size:0.8rem;color:var(--mauve-soft)">Totaal: <strong id="totaalPrijs" style="color:var(--rose)"></strong> · <strong id="totaalDuur" style="color:var(--rose)"></strong></div>
+          <button onclick="saveBehandelingen('${r.number}')" class="btn btn-primary btn-sm" style="padding:7px 14px">💾 Opslaan</button>
+        </div>
+      </div>
+
+      <div class="res-field">
+        <div class="res-field-lbl">Extra tijd aanpassen</div>
         <div class="dur-controls">
           <button class="dur-btn" onclick="adjDur('${r.number}',-30)">−</button>
           <div class="dur-display" id="dur-${r.number}">${r.duration} minuten</div>
@@ -1246,13 +1301,91 @@ function renderResDetail(r, box) {
           <button class="dur-btn" onclick="saveDur('${r.number}')" style="width:auto;padding:0 12px;font-size:0.75rem;border-radius:20px">Opslaan</button>
         </div>
       </div>
+
       <div class="res-field"><div class="res-field-lbl">Situatie klant</div><div class="res-field-val">${r.analysis?.samenvatting||''}</div></div>
       <div class="res-field"><div class="res-field-lbl">Wens</div><div class="res-field-val">${r.analysis?.wens||''}</div></div>
-      <div class="res-field"><div class="res-field-lbl">Uitleg behandeling</div><div class="res-field-val">${r.analysis?.uitleg||''}</div></div>
+      <div class="res-field"><div class="res-field-lbl">Originele AI analyse</div><div class="res-field-val">${r.analysis?.uitleg||''}</div></div>
+
       <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border-soft)">
         <button class="btn btn-ghost" onclick="deleteRes('${r.number}')" style="font-size:0.8rem;padding:9px 14px;color:var(--warn);border-color:var(--warn)">🗑 Reservering verwijderen</button>
       </div>
     </div>`;
+
+  calcTotals();
+}
+
+function calcTotals() {
+  let totPrijs = 0, totDuur = 0;
+  let i = 0;
+  while (document.getElementById(`bsel-${i}`)) {
+    const sel = document.getElementById(`bsel-${i}`);
+    const opt = sel.selectedOptions[0];
+    if (opt && opt.value) {
+      totPrijs += parseFloat(opt.dataset.prijs) || 0;
+      totDuur  += parseInt(opt.dataset.duur) || 0;
+    }
+    i++;
+  }
+  const p = document.getElementById('totaalPrijs');
+  const d = document.getElementById('totaalDuur');
+  if (p) p.textContent = totPrijs > 0 ? fmtPrice(totPrijs) : '—';
+  if (d) d.textContent = totDuur > 0 ? totDuur + ' min' : '—';
+}
+
+function addBehandeling() {
+  const container = document.getElementById('behandelingRows');
+  if (!container) return;
+  const i = resEditorRows++;
+  const row = document.createElement('div');
+  row.className = 'behandeling-row';
+  row.id = `brow-${i}`;
+  row.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:4px';
+  row.innerHTML = treatmentSelect(`bsel-${i}`) +
+    `<button onclick="removeBehandeling(${i})" style="background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--warn);flex-shrink:0" title="Verwijder">✕</button>`;
+  container.appendChild(row);
+  calcTotals();
+}
+
+function removeBehandeling(i) {
+  const row = document.getElementById(`brow-${i}`);
+  if (row) { row.remove(); calcTotals(); }
+}
+
+async function saveBehandelingen(number) {
+  const behandelingen = [];
+  let i = 0;
+  while (true) {
+    const sel = document.getElementById(`bsel-${i}`);
+    if (!sel) break;
+    const opt = sel.selectedOptions[0];
+    if (opt && opt.value) {
+      behandelingen.push({
+        naam:  opt.value,
+        prijs: parseFloat(opt.dataset.prijs) || 0,
+        duur:  parseInt(opt.dataset.duur) || 0
+      });
+    }
+    i++;
+  }
+
+  if (behandelingen.length === 0) { toast('Kies minimaal één behandeling'); return; }
+
+  const totaalPrijs = behandelingen.reduce((s, b) => s + b.prijs, 0);
+  const totaalDuur  = behandelingen.reduce((s, b) => s + b.duur, 0);
+  const naam        = behandelingen.map(b => b.naam).join(' + ');
+
+  try {
+    await call({
+      action: 'updateBehandeling',
+      number,
+      behandelingen,
+      naam,
+      totaalPrijs,
+      totaalDuur
+    });
+    toast(`✅ Behandeling opgeslagen: ${naam}`);
+    loadResList();
+  } catch { toast('Fout bij opslaan'); }
 }
 
 async function deleteRes(number) {
@@ -1449,16 +1582,68 @@ async function loadPriceName() {
 
 async function doUpload(input) {
   const file = input.files[0];
-  if (!file || file.type!=='application/pdf') { toast('Selecteer een PDF bestand'); return; }
+  if (!file) return;
+
+  const isPDF   = file.type === 'application/pdf' || file.name.endsWith('.pdf');
+  const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
+
+  if (!isPDF && !isExcel) { toast('Selecteer een PDF of Excel (.xlsx) bestand'); return; }
+
   toast('Uploaden…');
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    const b64=e.target.result.split(',')[1];
-    try { await call({ action:'uploadPricelist', pdfBase64:b64, fileName:file.name }); toast('✅ Prijslijst succesvol geüpload!'); loadPriceName(); }
-    catch { toast('Fout bij uploaden'); }
-  };
-  reader.readAsDataURL(file);
+
+  if (isPDF) {
+    // PDF — stuur als base64
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const b64 = e.target.result.split(',')[1];
+      try {
+        await call({ action:'uploadPricelist', pdfBase64: b64, fileName: file.name });
+        toast('✅ Prijslijst geüpload!');
+        loadPriceName();
+      } catch { toast('Fout bij uploaden'); }
+    };
+    reader.readAsDataURL(file);
+
+  } else {
+    // Excel — lees uit met SheetJS, converteer naar tekst voor de AI
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const XLSX = await import('https://cdn.sheetjs.com/xlsx-0.20.3/package/xlsx.mjs');
+        const data  = new Uint8Array(e.target.result);
+        const wb    = XLSX.read(data, { type: 'array' });
+
+        // Lees het eerste sheet
+        const ws    = wb.Sheets[wb.SheetNames[0]];
+        const rows  = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+        // Converteer naar leesbare tekst voor de AI
+        let tekst = `Prijslijst Blend by Jordan\n\n`;
+        for (const row of rows) {
+          if (!row[0] || String(row[0]).trim() === '') continue;
+          const naam  = String(row[0]).trim();
+          const prijs = row[1] ? String(row[1]).replace(/[€\s]/g,'').replace(',','.') : '';
+          const duur  = row[2] ? String(row[2]).replace(/[^0-9]/g,'') : '';
+          if (prijs && duur) {
+            tekst += `${naam}: €${parseFloat(prijs).toFixed(2).replace('.',',')} | ${duur} minuten\n`;
+          } else if (naam.length > 2) {
+            tekst += `\n## ${naam}\n`;
+          }
+        }
+
+        // Sla op als tekst (geen PDF base64 nodig)
+        await call({ action:'uploadPricelistText', priceText: tekst, fileName: file.name });
+        toast('✅ Excel prijslijst geüpload!');
+        loadPriceName();
+      } catch (err) {
+        console.error('Excel upload error:', err);
+        toast('Fout bij verwerken van Excel: ' + err.message);
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  }
 }
+
 </script>
 </body>
 </html>
