@@ -765,7 +765,7 @@ async function doAnalyze() {
   progress(88);
   try {
     const res = await call({ action:'analyzeHair', name:S.name, answers:S.answers });
-    if (res.error) { toast('Er ging iets mis. Probeer opnieuw.'); show('s-questions'); return; }
+    if (res.error) { toast('Fout: ' + res.error); show('s-questions'); return; }
     populateResult(res);
     show('s-result');
     progress(100);
