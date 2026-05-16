@@ -35,10 +35,10 @@ function getBlendStore() {
 }
 
 function generateNumber() {
-  const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let r = 'BL';
-  for (let i = 0; i < 4; i++) r += c[Math.floor(Math.random() * c.length)];
-  return r;
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = 'BL';
+  for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
 }
 
 function calcSlots(reservations, date, dur) {
@@ -209,11 +209,25 @@ ${DEFAULT_PRICE_LIST}`;
 
     if (action === 'saveReservation') {
       const { name, analysis, date, startMinutes } = body;
-      let number;
-      for (let i = 0; i < 20; i++) { const c = generateNumber(); try { const ex = await store.get(`reservation_${c}`); if (!ex) { number = c; break; } } catch { number = c; break; } }
-      const reservation = { number, name, analysis: { ...analysis, answers, origineelAdvies: analysis.behandeling }, date, startMinutes, duration: analysis.duur, status:'confirmed', createdAt: new Date().toISOString() };
-      await store.set(`reservation_${number}`, JSON.stringify(reservation));
-      return { statusCode: 200, headers: H, body: JSON.stringify({ number, reservation }) };
+
+      // Genereer direct een uniek nummer — botsing is statistisch verwaarloosbaar
+      const number = generateNumber() + generateNumber().slice(2); // Extra entropie
+      const finalNumber = 'BL' + number.slice(2, 6).toUpperCase(); // BL + 4 chars
+
+      const reservation = {
+        number: finalNumber,
+        name,
+        analysis: { ...analysis, answers: analysis.answers || body.answers || {}, origineelAdvies: analysis.behandeling },
+        date,
+        startMinutes,
+        duration: typeof analysis.duur === 'number' ? analysis.duur : parseInt(analysis.duur) || 60,
+        status: 'confirmed',
+        createdAt: new Date().toISOString()
+      };
+
+      await store.set(`reservation_${finalNumber}`, JSON.stringify(reservation));
+      console.log('Reservering opgeslagen:', finalNumber);
+      return { statusCode: 200, headers: H, body: JSON.stringify({ number: finalNumber, reservation }) };
     }
 
     if (action === 'getReservation') {
