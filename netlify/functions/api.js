@@ -204,6 +204,18 @@ ${DEFAULT_PRICE_LIST}`;
       return { statusCode: 200, headers: H, body: JSON.stringify({ reservations }) };
     }
 
+    if (action === 'getAllReservations') {
+      let all = [];
+      try {
+        const { blobs } = await store.list({ prefix: 'reservation_' });
+        for (const b of blobs) {
+          try { const r = await store.get(b.key, { type:'json' }); if (r) all.push(r); } catch {}
+        }
+      } catch (e) { console.log('getAllReservations error:', e.message); }
+      all.sort((a,b) => a.date === b.date ? a.startMinutes - b.startMinutes : a.date.localeCompare(b.date));
+      return { statusCode: 200, headers: H, body: JSON.stringify({ reservations: all }) };
+    }
+
     if (action === 'uploadPricelist') {
       const { pdfBase64, fileName } = body;
       await store.set('pricelist_b64', pdfBase64);
