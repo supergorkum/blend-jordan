@@ -250,6 +250,29 @@ ${DEFAULT_PRICE_LIST}`;
       return { statusCode: 200, headers: H, body: JSON.stringify({ reservations }) };
     }
 
+    if (action === 'generateEmailNarrative') {
+      const { naam, behandeling, samenvatting, wens, uitleg } = body;
+
+      const prompt = `Je bent Blendy, de warme en enthousiaste stylist assistent van kapsalon Blend by Jordan. Je schrijft een persoonlijk stukje voor in een afspraakbevestigingsmail.
+
+KLANT: ${naam}
+BEHANDELING: ${behandeling}
+SITUATIE HAAR: ${samenvatting}
+WENS VAN DE KLANT: ${wens}
+WAAROM DEZE BEHANDELING: ${uitleg}
+
+Schrijf een persoonlijk, warm en enthousiast verhaaltje van 3 à 4 alinea's dat:
+- Begint met een oprecht compliment of aanmoediging richting ${naam}
+- Beschrijft wat er tijdens de behandeling gaat gebeuren, stap voor stap maar in gewone taal (geen vaktermen die onbegrijpelijk zijn)
+- Vertelt wat het eindresultaat zal zijn en hoe dat eruit ziet
+- Eindigt met een vrolijke, persoonlijke afsluiting
+
+Schrijf alsof Blendy dit rechtstreeks aan ${naam} stuurt. Gebruik 'je' en 'jij'. Geen opsommingen of bullets — gewoon mooie lopende tekst. Geen aanhef of ondertekening, want die staan al in de mail. Maximaal 180 woorden.`;
+
+      const tekst = await askClaude('claude-haiku-4-5-20251001', 400, null, [{ role:'user', content: prompt }]);
+      return { statusCode: 200, headers: H, body: JSON.stringify({ verhaal: tekst.trim() }) };
+    }
+
     if (action === 'updateBehandeling') {
       const { number, behandelingen, naam, totaalPrijs, totaalDuur } = body;
       try {
