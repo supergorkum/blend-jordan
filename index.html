@@ -590,6 +590,10 @@
           <button class="btn btn-primary btn-sm" onclick="lookupRes()">Zoek</button>
         </div>
         <div id="resResult"></div>
+        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border-soft)">
+          <button class="btn btn-ghost" onclick="doCleanup()" style="font-size:0.8rem;padding:10px 16px">🧹 Verlopen reserveringen opruimen</button>
+          <div id="cleanupResult" style="margin-top:8px;font-size:0.8rem;color:var(--mauve-soft)"></div>
+        </div>
       </div>
       <div class="atab-content" id="tab-week">
         <div class="week-nav">
@@ -1039,7 +1043,34 @@ function renderResDetail(r, box) {
       <div class="res-field"><div class="res-field-lbl">Situatie klant</div><div class="res-field-val">${r.analysis?.samenvatting||''}</div></div>
       <div class="res-field"><div class="res-field-lbl">Wens</div><div class="res-field-val">${r.analysis?.wens||''}</div></div>
       <div class="res-field"><div class="res-field-lbl">Uitleg behandeling</div><div class="res-field-val">${r.analysis?.uitleg||''}</div></div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border-soft)">
+        <button class="btn btn-ghost" onclick="deleteRes('${r.number}')" style="font-size:0.8rem;padding:9px 14px;color:var(--warn);border-color:var(--warn)">🗑 Reservering verwijderen</button>
+      </div>
     </div>`;
+}
+
+async function deleteRes(number) {
+  if (!confirm(`Reservering ${number} verwijderen? Dit kan niet ongedaan worden.`)) return;
+  try {
+    const res = await call({ action:'deleteReservation', number });
+    if (res.success) {
+      document.getElementById('resResult').innerHTML = `<p style="color:var(--success)">✅ Reservering ${number} verwijderd.</p>`;
+      document.getElementById('resSearch').value = '';
+      toast('Reservering verwijderd');
+    }
+  } catch { toast('Fout bij verwijderen'); }
+}
+
+async function doCleanup() {
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = '🧹 Bezig…';
+  try {
+    const res = await call({ action:'cleanupExpired' });
+    document.getElementById('cleanupResult').textContent = res.deleted > 0 ? `✅ ${res.deleted} verlopen reservering(en) verwijderd.` : 'Geen verlopen reserveringen gevonden.';
+  } catch { document.getElementById('cleanupResult').textContent = 'Fout bij opruimen.'; }
+  btn.disabled = false;
+  btn.textContent = '🧹 Verlopen reserveringen opruimen';
 }
 
 async function adjDur(num, adj) {
