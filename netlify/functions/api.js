@@ -36,7 +36,7 @@ function getBlendStore() {
 
 function generateNumber() {
   const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let r = 'BJ';
+  let r = 'BL';
   for (let i = 0; i < 4; i++) r += c[Math.floor(Math.random() * c.length)];
   return r;
 }
