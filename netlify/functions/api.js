@@ -82,6 +82,30 @@ exports.handler = async (event) => {
     // ── ANALYSE HAAR (geen Blobs nodig) ──────────────────────
     if (action === 'analyzeHair') {
       const { answers, name } = body;
+
+      // Haal aangepaste prijslijst op
+      let prijslijst = DEFAULT_PRICE_LIST;
+      try {
+        const tekst = await store.get('pricelist_text', { type:'text' });
+        if (tekst) { prijslijst = tekst; }
+      } catch {}
+
+      // Haal correctievoorbeelden op (leermateriaal van Jordan)
+      let voorbeeldenTekst = '';
+      try {
+        const raw = await store.get('correctie_voorbeelden', { type:'text' });
+        if (raw) {
+          const voorbeelden = JSON.parse(raw);
+          if (voorbeelden.length > 0) {
+            voorbeeldenTekst = '\n\nLEERVOORBEELDEN (eerdere correcties door de stylist, gebruik deze als referentie):\n';
+            voorbeelden.slice(-8).forEach((v, i) => {
+              const ant = Object.entries(v.answers || {}).map(([k,val]) => `${k}: ${val}`).join(', ');
+              voorbeeldenTekst += `${i+1}. Antwoorden: [${ant}] → AI adviseerde: "${v.aiAdvies}" → Correcte behandeling: "${v.correcte}"\n`;
+            });
+          }
+        }
+      } catch {}
+
       const labels = { haarlengte:'Haarlengte', haarkleur:'Haarkleur', eerderGeverfd:'Eerder geverfd', huidigeKleur:'Huidige kleur', gewenstResultaat:'Gewenst resultaat', knippen:'Knippen', toner:'Toner' };
       const answersText = Object.entries(answers).map(([k,v]) => `- ${labels[k]||k}: ${v}`).join('\n');
       const prompt = `Je bent haarstylist assistent bij Blend by Jordan. Geef behandeladvies als JSON.
@@ -102,7 +126,7 @@ BESLISREGELS:
 9. Balayage heeft geen toner variant
 
 PRIJSLIJST:
-${DEFAULT_PRICE_LIST}
+${prijslijst}${voorbeeldenTekst}
 
 Geef ALLEEN dit JSON object, geen andere tekst:
 {"samenvatting":"situatie ${name} 1-2 zinnen","wens":"wens 1 zin","behandeling":"exacte naam","prijs":0.00,"duur":0,"uitleg":"uitleg 1-2 zinnen"}`;
@@ -187,7 +211,7 @@ ${DEFAULT_PRICE_LIST}`;
       const { name, analysis, date, startMinutes } = body;
       let number;
       for (let i = 0; i < 20; i++) { const c = generateNumber(); try { const ex = await store.get(`reservation_${c}`); if (!ex) { number = c; break; } } catch { number = c; break; } }
-      const reservation = { number, name, analysis, date, startMinutes, duration: analysis.duur, status:'confirmed', createdAt: new Date().toISOString() };
+      const reservation = { number, name, analysis: { ...analysis, answers }, date, startMinutes, duration: analysis.duur, status:'confirmed', createdAt: new Date().toISOString() };
       await store.set(`reservation_${number}`, JSON.stringify(reservation));
       return { statusCode: 200, headers: H, body: JSON.stringify({ number, reservation }) };
     }
@@ -226,6 +250,46 @@ ${DEFAULT_PRICE_LIST}`;
       return { statusCode: 200, headers: H, body: JSON.stringify({ reservations }) };
     }
 
+    if (action === 'updateBehandeling') {
+      const { number, behandelingen, naam, totaalPrijs, totaalDuur } = body;
+      try {
+        const r = await store.get(`reservation_${number}`, { type:'json' });
+        if (!r) throw new Error('not found');
+
+        // Sla originele analyse op voor vergelijking
+        const origBehandeling = r.analysis?.behandeling || '';
+
+        // Update reservering
+        r.analysis = { ...r.analysis, behandeling: naam, behandelingen, prijs: totaalPrijs, duur: totaalDuur };
+        r.duration = totaalDuur;
+        await store.set(`reservation_${number}`, JSON.stringify(r));
+
+        // Sla correctie op als leervoorbeeld (alleen als de behandeling veranderd is)
+        if (origBehandeling && origBehandeling !== naam && r.analysis.answers) {
+          try {
+            const voorbeeldenRaw = await store.get('correctie_voorbeelden', { type:'text' }).catch(() => '[]');
+            const voorbeelden = JSON.parse(voorbeeldenRaw || '[]');
+            voorbeelden.push({
+              answers: r.analysis.answers,
+              aiAdvies: origBehandeling,
+              correcte: naam,
+              datum: new Date().toISOString()
+            });
+            // Bewaar maximaal 20 meest recente voorbeelden
+            const recent = voorbeelden.slice(-20);
+            await store.set('correctie_voorbeelden', JSON.stringify(recent));
+            console.log('Correctievoorbeeld opgeslagen:', origBehandeling, '→', naam);
+          } catch (e) {
+            console.log('Kon correctievoorbeeld niet opslaan:', e.message);
+          }
+        }
+
+        return { statusCode: 200, headers: H, body: JSON.stringify({ success: true, reservation: r }) };
+      } catch (e) {
+        return { statusCode: 404, headers: H, body: JSON.stringify({ error: e.message }) };
+      }
+    }
+
     if (action === 'getAllReservations') {
       let all = [];
       try {
@@ -242,6 +306,17 @@ ${DEFAULT_PRICE_LIST}`;
       const { pdfBase64, fileName } = body;
       await store.set('pricelist_b64', pdfBase64);
       await store.set('pricelist_name', fileName || 'prijslijst.pdf');
+      // Wis tekst-versie zodat PDF gebruikt wordt
+      try { await store.delete('pricelist_text'); } catch {}
+      return { statusCode: 200, headers: H, body: JSON.stringify({ success: true }) };
+    }
+
+    if (action === 'uploadPricelistText') {
+      const { priceText, fileName } = body;
+      await store.set('pricelist_text', priceText);
+      await store.set('pricelist_name', fileName || 'prijslijst.xlsx');
+      // Wis PDF-versie zodat tekst gebruikt wordt
+      try { await store.delete('pricelist_b64'); } catch {}
       return { statusCode: 200, headers: H, body: JSON.stringify({ success: true }) };
     }
 
