@@ -690,13 +690,29 @@ function getMonday(d) {
   return dt;
 }
 
-function populateResult(analysis) {
-  document.getElementById('rSamenvatting').textContent = analysis.samenvatting;
-  document.getElementById('rWens').textContent = analysis.wens;
-  document.getElementById('rBehandeling').textContent = analysis.behandeling;
+function normalizeAnalysis(raw) {
+  // Normalize price: handle string like "€106,35" or 106.35 or "106,35"
+  let prijs = raw.prijs;
+  if (typeof prijs === 'string') {
+    prijs = parseFloat(prijs.replace(/[€\s]/g,'').replace(',','.')) || 0;
+  }
+  // Normalize duration: handle string like "95 minuten" or 95
+  let duur = raw.duur;
+  if (typeof duur === 'string') {
+    duur = parseInt(duur) || 0;
+  }
+  return { ...raw, prijs: prijs || 0, duur: duur || 0 };
+}
+
+function populateResult(rawAnalysis) {
+  const analysis = normalizeAnalysis(rawAnalysis);
+  S.analysis = analysis;
+  document.getElementById('rSamenvatting').textContent = analysis.samenvatting || '';
+  document.getElementById('rWens').textContent = analysis.wens || '';
+  document.getElementById('rBehandeling').textContent = analysis.behandeling || '';
   document.getElementById('rPrijs').textContent = fmtPrice(analysis.prijs);
   document.getElementById('rDuur').textContent = analysis.duur + ' min';
-  document.getElementById('rUitleg').textContent = analysis.uitleg;
+  document.getElementById('rUitleg').textContent = analysis.uitleg || '';
 }
 
 // ════════════════════════════════════════════════════════
@@ -746,7 +762,6 @@ async function doAnalyze() {
   try {
     const res = await call({ action:'analyzeHair', name:S.name, answers:S.answers });
     if (res.error) { toast('Er ging iets mis. Probeer opnieuw.'); show('s-questions'); return; }
-    S.analysis = res;
     populateResult(res);
     show('s-result');
     progress(100);
@@ -963,13 +978,7 @@ function blendyTyping(on) {
 }
 
 function transitionFromBlendy(analyse) {
-  S.analysis = analyse;
-  document.getElementById('rSamenvatting').textContent = analyse.samenvatting;
-  document.getElementById('rWens').textContent = analyse.wens;
-  document.getElementById('rBehandeling').textContent = analyse.behandeling;
-  document.getElementById('rPrijs').textContent = fmtPrice(analyse.prijs);
-  document.getElementById('rDuur').textContent  = analyse.duur + ' min';
-  document.getElementById('rUitleg').textContent = analyse.uitleg;
+  populateResult(analyse);
   show('s-result');
   progress(100);
 }
