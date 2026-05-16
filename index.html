@@ -425,7 +425,7 @@
         ✨ Kies met vaste opties
       </button>
       <div class="or-divider"><span>of vertel het zelf aan Blendy</span></div>
-      <button class="blendy-option-btn" onclick="startChat()">
+      <button class="blendy-option-btn" onclick="startBlendy()">
         <div class="blendy-avatar-sm">✂️<div class="blendy-badge"></div></div>
         <div class="blendy-option-info">
           <div class="blendy-option-title">Chat met Blendy</div>
@@ -590,10 +590,6 @@
           <button class="btn btn-primary btn-sm" onclick="lookupRes()">Zoek</button>
         </div>
         <div id="resResult"></div>
-        <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border-soft)">
-          <button class="btn btn-ghost" onclick="doCleanup()" style="font-size:0.8rem;padding:10px 16px">🧹 Verlopen reserveringen opruimen</button>
-          <div id="cleanupResult" style="margin-top:8px;font-size:0.8rem;color:var(--mauve-soft)"></div>
-        </div>
       </div>
       <div class="atab-content" id="tab-week">
         <div class="week-nav">
@@ -1000,6 +996,8 @@ function doLogin() {
     document.getElementById('adminPanel').style.display='block';
     adminWeek = getMonday(new Date());
     loadWeek(); loadPriceName();
+    // Automatisch verlopen reserveringen opruimen op de achtergrond
+    call({ action:'cleanupExpired' }).then(r => { if(r.deleted>0) console.log('Opgeruimd:', r.deleted); }).catch(()=>{});
   } else { toast('Onjuist wachtwoord'); document.getElementById('adminPw').value=''; }
 }
 
@@ -1038,6 +1036,7 @@ function renderResDetail(r, box) {
           <button class="dur-btn" onclick="adjDur('${r.number}',-30)">−</button>
           <div class="dur-display" id="dur-${r.number}">${r.duration} minuten</div>
           <button class="dur-btn" onclick="adjDur('${r.number}',30)">+</button>
+          <button class="dur-btn" onclick="saveDur('${r.number}')" style="width:auto;padding:0 12px;font-size:0.75rem;border-radius:20px">Opslaan</button>
         </div>
       </div>
       <div class="res-field"><div class="res-field-lbl">Situatie klant</div><div class="res-field-val">${r.analysis?.samenvatting||''}</div></div>
@@ -1074,10 +1073,27 @@ async function doCleanup() {
 }
 
 async function adjDur(num, adj) {
+  const el = document.getElementById('dur-'+num);
+  if (!el) return;
+  const current = parseInt(el.textContent) || 0;
+  el.textContent = Math.max(30, current + adj) + ' minuten';
+}
+
+async function saveDur(num) {
+  const el = document.getElementById('dur-'+num);
+  if (!el) return;
+  const newDur = parseInt(el.textContent) || 0;
   try {
-    const res = await call({ action:'updateDuration', number:num, adjustment:adj });
-    if (res.reservation) { document.getElementById('dur-'+num).textContent = res.reservation.duration+' minuten'; toast(`Duur aangepast naar ${res.reservation.duration} minuten`); }
-  } catch { toast('Fout bij aanpassen'); }
+    // Get current reservation to calculate adjustment
+    const res = await call({ action:'getReservation', number: num });
+    if (res.reservation) {
+      const adj = newDur - res.reservation.duration;
+      if (adj !== 0) {
+        await call({ action:'updateDuration', number: num, adjustment: adj });
+      }
+      toast('✅ Duur opgeslagen: ' + newDur + ' minuten');
+    }
+  } catch { toast('Fout bij opslaan'); }
 }
 
 function shiftWeek(d) { adminWeek = new Date(adminWeek); adminWeek.setDate(adminWeek.getDate()+d*7); loadWeek(); }
@@ -1131,6 +1147,12 @@ function renderCal(reservations, weekStart) {
       block.style.top=topPx+'px'; block.style.height=Math.max(r.duration*SC,16)+'px';
       block.innerHTML=`<div class="appt-name">${r.name}</div><div class="appt-time">${fmt(r.startMinutes)}</div>`;
       block.title=`${r.name}\n${fmtDate(r.date)} ${fmt(r.startMinutes)}\n${r.analysis?.behandeling||''}`;
+      block.style.cursor='pointer';
+      block.onclick=()=>{
+        switchTab('res', document.querySelector('.atab'));
+        document.getElementById('resSearch').value = r.number;
+        lookupRes();
+      };
       col.appendChild(block);
     });
     wrap.appendChild(col);
