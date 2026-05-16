@@ -139,18 +139,40 @@ ${DEFAULT_PRICE_LIST}`;
     if (!store) return { statusCode: 500, headers: H, body: JSON.stringify({ error: 'Opslag niet beschikbaar' }) };
 
     if (action === 'checkAvailability') {
-      const { durationMinutes } = body;
+      const { durationMinutes, startDate } = body;
       let allRes = [];
       try { const { blobs } = await store.list({ prefix: 'reservation_' }); for (const b of blobs) { try { const r = await store.get(b.key, { type:'json' }); if (r) allRes.push(r); } catch {} } } catch (e) { console.log('list error:', e.message); }
-      const today = new Date(), availability = {};
-      let found = 0, offset = 1;
-      while (found < 5) {
-        const d = new Date(today); d.setDate(today.getDate() + offset++);
-        const dow = d.getDay(); if (dow === 0 || dow === 6) continue;
-        const ds = d.toISOString().split('T')[0];
-        availability[ds] = { available: calcSlots(allRes, ds, durationMinutes).length > 0, slots: calcSlots(allRes, ds, durationMinutes) };
-        found++;
+
+      const availability = {};
+      let found = 0;
+
+      if (startDate) {
+        // Show exactly the 5 weekdays of the requested week
+        const start = new Date(startDate + 'T12:00:00');
+        for (let i = 0; i < 7 && found < 5; i++) {
+          const d = new Date(start);
+          d.setDate(start.getDate() + i);
+          const dow = d.getDay();
+          if (dow === 0 || dow === 6) continue;
+          const ds = d.toISOString().split('T')[0];
+          const slots = calcSlots(allRes, ds, durationMinutes);
+          availability[ds] = { available: slots.length > 0, slots };
+          found++;
+        }
+      } else {
+        // Default: next 5 weekdays from today
+        const today = new Date();
+        let offset = 1;
+        while (found < 5) {
+          const d = new Date(today); d.setDate(today.getDate() + offset++);
+          const dow = d.getDay(); if (dow === 0 || dow === 6) continue;
+          const ds = d.toISOString().split('T')[0];
+          const slots = calcSlots(allRes, ds, durationMinutes);
+          availability[ds] = { available: slots.length > 0, slots };
+          found++;
+        }
       }
+
       return { statusCode: 200, headers: H, body: JSON.stringify({ availability }) };
     }
 
