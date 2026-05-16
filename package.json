@@ -1,0 +1,8 @@
+{
+  "name": "blend-by-jordan",
+  "version": "1.0.0",
+  "description": "Reserveringssysteem voor Blend by Jordan kapsalon",
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  }
+}
