@@ -211,7 +211,7 @@ ${DEFAULT_PRICE_LIST}`;
       const { name, analysis, date, startMinutes } = body;
       let number;
       for (let i = 0; i < 20; i++) { const c = generateNumber(); try { const ex = await store.get(`reservation_${c}`); if (!ex) { number = c; break; } } catch { number = c; break; } }
-      const reservation = { number, name, analysis: { ...analysis, answers }, date, startMinutes, duration: analysis.duur, status:'confirmed', createdAt: new Date().toISOString() };
+      const reservation = { number, name, analysis: { ...analysis, answers, origineelAdvies: analysis.behandeling }, date, startMinutes, duration: analysis.duur, status:'confirmed', createdAt: new Date().toISOString() };
       await store.set(`reservation_${number}`, JSON.stringify(reservation));
       return { statusCode: 200, headers: H, body: JSON.stringify({ number, reservation }) };
     }
@@ -279,22 +279,20 @@ Schrijf alsof Blendy dit rechtstreeks aan ${naam} stuurt. Gebruik 'je' en 'jij'.
         const r = await store.get(`reservation_${number}`, { type:'json' });
         if (!r) throw new Error('not found');
 
-        // Sla originele analyse op voor vergelijking
-        const origBehandeling = r.analysis?.behandeling || '';
-
-        // Update reservering
-        r.analysis = { ...r.analysis, behandeling: naam, behandelingen, prijs: totaalPrijs, duur: totaalDuur };
+        // Update reservering — bewaar het originele AI advies altijd
+        const origineelAdvies = r.analysis?.origineelAdvies || r.analysis?.behandeling || '';
+        r.analysis = { ...r.analysis, behandeling: naam, behandelingen, prijs: totaalPrijs, duur: totaalDuur, origineelAdvies };
         r.duration = totaalDuur;
         await store.set(`reservation_${number}`, JSON.stringify(r));
 
         // Sla correctie op als leervoorbeeld (alleen als de behandeling veranderd is)
-        if (origBehandeling && origBehandeling !== naam && r.analysis.answers) {
+        if (origineelAdvies && origineelAdvies !== naam && r.analysis.answers) {
           try {
             const voorbeeldenRaw = await store.get('correctie_voorbeelden', { type:'text' }).catch(() => '[]');
             const voorbeelden = JSON.parse(voorbeeldenRaw || '[]');
             voorbeelden.push({
               answers: r.analysis.answers,
-              aiAdvies: origBehandeling,
+              aiAdvies: origineelAdvies,
               correcte: naam,
               datum: new Date().toISOString()
             });
