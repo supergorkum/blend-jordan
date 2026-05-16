@@ -1001,8 +1001,10 @@ async function bookSlot() {
   if (!S.selSlot) return;
   try {
     const res = await call({ action:'saveReservation', name:S.name, analysis:S.analysis, date:S.selDate, startMinutes:S.selSlot });
-    const num = res.number || (res.reservation && res.reservation.number) || '——';
-    const displayNum = num.startsWith('BL') ? 'BLEND·' + num.slice(2) : num.startsWith('BJ') ? 'BLEND·' + num.slice(2) : num;
+    const num = res.number || (res.reservation && res.reservation.number) || '';
+    const displayNum = num
+      ? (num.startsWith('BL') || num.startsWith('BJ') ? 'BLEND·' + num.slice(2) : num)
+      : '—';
     document.getElementById('cNum').textContent = displayNum;
     document.getElementById('cNumRaw').value = num;
     document.getElementById('cName').textContent = S.name;
