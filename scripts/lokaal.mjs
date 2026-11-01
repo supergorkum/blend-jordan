@@ -7,8 +7,9 @@
 // LET OP: de gegevens in de proef zijn de ECHTE gegevens. De aanroepen naar
 // /.netlify/functions gaan via een doorgeefluik naar de live site
 // (standaard https://vermillion-sawine-41235a.netlify.app, aan te passen met
-// BLEND_LIVE). Een boeking, verwijdering of correctie in de proef verandert
-// dus echte reserveringen. Kijken en klikken mag; opslaan alleen met opzet.
+// BLEND_LIVE). Acties die gegevens veranderen (boeken, verwijderen, opruimen,
+// aanpassen, prijslijst uploaden) worden daarom geblokkeerd. Wil je ze toch
+// laten doorgaan, start dan met BLEND_SCHRIJVEN=1.
 
 import http from "node:http";
 import fs from "node:fs";
@@ -17,6 +18,8 @@ import { BOUW, REPO, synchroniseer } from "./bouwmap.mjs";
 
 const POORT = Number(process.env.PORT || 5174);
 const LIVE = (process.env.BLEND_LIVE || "https://vermillion-sawine-41235a.netlify.app").replace(/\/$/, "");
+const SCHRIJF = new Set(["saveReservation", "deleteReservation", "cleanupExpired", "updateDuration", "updateBehandeling", "uploadPricelist", "uploadPricelistText"]);
+const MAG_SCHRIJVEN = process.env.BLEND_SCHRIJVEN === "1";
 const TYPES = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
@@ -43,6 +46,15 @@ const server = http.createServer(async (req, res) => {
   if (url.pathname.startsWith("/.netlify/functions/")) {
     const delen = [];
     for await (const d of req) delen.push(d);
+    let actie = "";
+    try {
+      actie = JSON.parse(Buffer.concat(delen).toString("utf8")).action || "";
+    } catch {}
+    if (SCHRIJF.has(actie) && !MAG_SCHRIJVEN) {
+      res.writeHead(403, { "content-type": "application/json" });
+      res.end(JSON.stringify({ error: "Geblokkeerd in de proef: " + actie + " verandert echte gegevens. Start met BLEND_SCHRIJVEN=1 als dat echt de bedoeling is." }));
+      return;
+    }
     try {
       const r = await fetch(LIVE + url.pathname + url.search, {
         method: req.method,

@@ -69,7 +69,7 @@ Er is **geen build-stap** nodig; `netlify.toml` publiceert de root direct.
 ### Frontend (`index.html`)
 - Schermen: welkom → vragen (7 stuks) → AI-analyse → dagkiezer (weeknavigatie) → tijdslot → bevestiging
 - Alternatief instappunt: Blendy-chatbot (schaartje-knop op welkomstscherm), stelt max. 8 vragen in gespreksvorm en leidt naar dezelfde bevestigingsstap
-- Admin-portaal: wachtwoord-overlay → reserveringslijst (per week) → weekkalender → prijslijst uploaden → omzet per maand
+- Admin-portaal (sleutelknop, geen login): reserveringslijst (per week) → weekkalender → prijslijst uploaden → omzet per maand
 - Reserveringsnummer: `BL` + 4 tekens, getoond als `BLEND·XXXX`
 - Instagram-link: `https://www.instagram.com/blend_x_jordan/`
 - Logo: base64-embedded PNG (roze "BLEND X JORDAN" vierkant, border-radius 20px)
@@ -104,7 +104,7 @@ Actions die de frontend aanroept:
 
 - **Taal in de UI**: altijd Nederlands
 - **Reserveringscode**: formaat `BL` + 4 alfanumerieke tekens, display als `BLEND·XXXX`
-- **Admin-wachtwoord**: staat in de frontend (zoek op `adminPassword` of vergelijkbaar in `index.html`) — nooit wijzigen zonder Jordan te informeren
+- **Geen wachtwoorden**: dit is een demo (besloten door Edgar, 1 november 2026). Het beheerportaal opent direct met de sleutelknop; er is geen login en er hoort geen wachtwoord in code, tekst of Netlify-instellingen. Komt er ooit een echte salon in productie, dan hoort toegangscontrole aan de serverkant (in `api.js`), niet in `index.html`.
 - **Tijden**: ochtend 09:00–12:00, middag 13:00–18:00, blokken van 30 minuten
 - **Prijslijst**: Jordan kan via het admin-portaal een Excel-prijslijst uploaden; de AI gebruikt die dan als bron
 
@@ -148,8 +148,9 @@ Werken doe je altijd in de projectmap; de bouwmap is wegwerp. Draai nooit
 - `npm run lokaal`: de site op http://127.0.0.1:5174, ook als preview in Code
   (`.claude/launch.json`). Wijzigingen in de projectmap lopen vanzelf mee. De
   aanroepen naar `/.netlify/functions` gaan naar de LIVE site met de ECHTE
-  reserveringen: kijken mag, een boeking of verwijdering in de proef verandert
-  echte gegevens.
+  reserveringen. Acties die gegevens veranderen (boeken, verwijderen, opruimen,
+  duur of behandeling aanpassen, prijslijst uploaden) worden in de proef
+  geblokkeerd. Alleen met `BLEND_SCHRIJVEN=1 npm run lokaal` gaan ze door.
 - `npm run bouwmap`: alleen de bouwmap bijwerken.
 
 **Elke push gaat eerst door de controle.** `scripts/git-hooks/pre-push` draait
@@ -202,19 +203,11 @@ nooit als leeg en schrijf er niets overheen. `bouwmap.mjs` stopt er dan mee.
   `objects/maintenance.lock` en `objects/*/tmp_obj_*` achter. Na toestemming om
   te verwijderen zijn alleen die restanten weggehaald. Zonder toestemming:
   `mv .git/HEAD.lock .git/stale-HEAD-lock`.
-- Het beheerderswachtwoord staat leesbaar in `index.html` (zoek op `doLogin`) en
-  de repo is publiek. Dat is niet aangepast, want weghalen breekt de inlog.
-  Verplaatsen naar een controle aan de serverkant is een verbetering voor later,
-  in overleg met Jordan.
-- `netlify.toml` publiceert de hele rootmap (`publish = "."`). Alles wat in de
-  repo staat, is dus ook via de site op te halen, ook `CLAUDE.md`, `scripts/` en
-  `package.json`. Er staan geen sleutels in. Zet er nooit iets in wat niet
-  openbaar mag.
+- Het beheerderswachtwoord (en de hele login) is op 1 november 2026 uit de site gehaald, op verzoek van Edgar: het is een demo. De beheeracties in `api.js` hadden toch al geen controle.
+- `netlify.toml` publiceert de hele rootmap (`publish = "."`). Daarom geven `/CLAUDE.md`, `/scripts/*`, `/package.json`, `/netlify/*` en een paar andere interne paden via redirects met `force` een 404 (`404.html`). De bestanden staan wel in de publieke GitHub-repo; zet er nooit iets in wat niet openbaar mag.
 - `OVERDRACHT-UIT-CHAT.md` staat nu in `.overstap/` (in `.gitignore`).
 
-**Openstaand na de overstap:** commit `a24755f` (1.1) en de commit met dit
-kopje staan alleen nog lokaal. Zodra ze zijn gepusht en live gecontroleerd,
-deze alinea weghalen.
+**Openstaand na de overstap:** zie de laatste commits in `git log`. Is `git rev-list --count origin/main..HEAD` groter dan 0, dan is er nog niet gepusht. Pushen vereist de Claude GitHub-app op `supergorkum/blend-jordan` (of een aangemelde Terminal).
 
 ## Changelog
 
@@ -222,3 +215,4 @@ deze alinea weghalen.
 |---|---|---|
 | 1.0 | nov 2026 | Volledig systeem gebouwd in chat, overgezet naar Code |
 | 1.1 | 1 nov 2026 | Overstap naar Claude Code: controle en pre-push hook, bouwmap en lokale proef, onderhoudsregel op het welkomstscherm |
+| 1.2 | 1 nov 2026 | Demo zonder wachtwoorden: beheer opent direct; proef schrijft standaard niets; interne bestanden niet meer op te halen via de site |

@@ -46,6 +46,18 @@ function scriptblokken(html) {
   return uit;
 }
 
+function hook() {
+  const h = path.join(REPO, "scripts/git-hooks/pre-push");
+  try {
+    if (!(fs.statSync(h).mode & 0o111)) {
+      fs.chmodSync(h, 0o755);
+      meld("pre-push hook was niet uitvoerbaar (Google Drive): hersteld");
+    }
+  } catch (e) {
+    fouten.push("pre-push hook niet gevonden of niet te herstellen: " + e.message);
+  }
+}
+
 function versie() {
   console.log("1. Versie, changelog en onderhoudsregel");
   const pkg = JSON.parse(lees("package.json"));
@@ -140,6 +152,7 @@ function geheimen() {
 
 console.log("Controle Blend by Jordan" + (PUSH ? " (voor de push)" : ""));
 try {
+  hook();
   versie();
   if (PUSH) pushInhoud();
   if (!SNEL) {

@@ -607,16 +607,7 @@
 <div class="admin-overlay" id="adminOverlay" onclick="closeOnBack(event)">
   <div class="admin-sheet">
     <div class="sheet-handle"></div>
-    <div id="adminLogin">
-      <h2 style="text-align:center;margin-bottom:16px">Beheerder inloggen</h2>
-      <div class="field">
-        <label>Wachtwoord</label>
-        <input type="password" id="adminPw" placeholder="Voer wachtwoord in" class="search-input" style="width:100%;border-radius:50px;" onkeydown="if(event.key==='Enter')doLogin()">
-      </div>
-      <button class="btn btn-primary" onclick="doLogin()">Inloggen</button>
-      <button class="btn btn-ghost" onclick="closeAdmin()" style="margin-top:8px">Annuleren</button>
-    </div>
-    <div id="adminPanel" style="display:none">
+    <div id="adminPanel">
       <div class="admin-head">
         <h2>Beheer</h2>
         <button class="admin-close" onclick="closeAdmin()">✕</button>
@@ -1165,19 +1156,14 @@ function transitionFromBlendy(analyse) {
 // ════════════════════════════════════════════════════════
 //  ADMIN
 // ════════════════════════════════════════════════════════
-function openAdmin() { document.getElementById('adminOverlay').classList.add('open'); document.getElementById('adminLogin').style.display='block'; document.getElementById('adminPanel').style.display='none'; document.getElementById('adminPw').value=''; setTimeout(()=>document.getElementById('adminPw').focus(),350); }
+function openAdmin() {
+  document.getElementById('adminOverlay').classList.add('open');
+  adminWeek = getMonday(new Date());
+  loadWeek(); loadPriceName(); loadResList();
+  call({ action:'cleanupExpired' }).then(r => { if(r.deleted>0) console.log('Opgeruimd:', r.deleted); }).catch(()=>{});
+}
 function closeAdmin() { document.getElementById('adminOverlay').classList.remove('open'); }
 function closeOnBack(e) { if (e.target===document.getElementById('adminOverlay')) closeAdmin(); }
-
-function doLogin() {
-  if (document.getElementById('adminPw').value === 'jordan') {
-    document.getElementById('adminLogin').style.display='none';
-    document.getElementById('adminPanel').style.display='block';
-    adminWeek = getMonday(new Date());
-    loadWeek(); loadPriceName(); loadResList();
-    call({ action:'cleanupExpired' }).then(r => { if(r.deleted>0) console.log('Opgeruimd:', r.deleted); }).catch(()=>{});
-  } else { toast('Onjuist wachtwoord'); document.getElementById('adminPw').value=''; }
-}
 
 function switchTab(name, btn) {
   document.querySelectorAll('.atab').forEach(t=>t.classList.remove('on'));
