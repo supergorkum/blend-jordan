@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#160A10">
+  <meta name="theme-color" content="#4A1230">
   <title>Blend by Jordan — Reserveren</title>
   <script>
     // Weergave: telefoon of computer. Kortste vensterzijde plus grove aanwijzer,
@@ -26,10 +26,10 @@
 
     :root {
       color-scheme: dark;
-      --nacht:       #160A10;
-      --blush:       #1E0E16;
-      --blush-mid:   #2A1320;
-      --card:        #241019;
+      --nacht:       #3A0E26;
+      --blush:       #4F1634;
+      --blush-mid:   #5E1B3E;
+      --card:        #5A1A3B;
       --rose:        #FF5FA2;
       --rose-light:  #E27DA0;
       --rose-dark:   #FFD3E5;
@@ -38,9 +38,9 @@
       --neon-glow:   rgba(255, 45, 135, 0.38);
       --buis:        #FF8CBE;
       --mauve:       #F8E6EE;
-      --mauve-soft:  #C99AB2;
-      --border:      #4A2234;
-      --border-soft: #3A1A29;
+      --mauve-soft:  #F2B6D0;
+      --border:      #8A3462;
+      --border-soft: #6E2650;
       --success:     #48A999;
       --warn:        #E09040;
       --shadow:      0 24px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 95, 162, 0.10);
@@ -51,8 +51,9 @@
     body {
       font-family: 'DM Sans', sans-serif;
       background:
-        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 45, 135, 0.20), transparent 70%),
-        radial-gradient(ellipse 60% 40% at 0% 100%, rgba(140, 42, 82, 0.35), transparent 70%),
+        radial-gradient(ellipse 90% 55% at 50% -10%, rgba(255, 45, 135, 0.45), transparent 70%),
+        radial-gradient(ellipse 70% 50% at 100% 100%, rgba(255, 95, 162, 0.30), transparent 70%),
+        radial-gradient(ellipse 60% 40% at 0% 60%, rgba(200, 40, 110, 0.30), transparent 70%),
         var(--nacht);
       background-attachment: fixed;
       color: var(--mauve);
@@ -72,7 +73,7 @@
 
     /* ── HEADER ────────────────────────────────────────── */
     .site-header { text-align: center; padding: 20px 20px 10px; position: relative; z-index: 1; }
-    .logo-blok { width: 104px; height: 104px; margin: 0 auto 8px; border-radius: 20px; background: rgba(22,10,16,0.6); border: 2px solid var(--buis); box-shadow: 0 0 6px var(--buis), 0 0 22px var(--neon-glow), inset 0 0 14px var(--neon-glow); display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; color: #FFE6F1; line-height: 1; text-shadow: 0 0 4px #fff, 0 0 10px var(--buis), 0 0 22px var(--neon); animation: neonAan 1.8s ease-out both, neonZoem 5s ease-in-out 1.8s infinite alternate; }
+    .logo-blok { width: 104px; height: 104px; margin: 0 auto 8px; border-radius: 20px; background: rgba(58,14,38,0.6); border: 2px solid var(--buis); box-shadow: 0 0 6px var(--buis), 0 0 22px var(--neon-glow), inset 0 0 14px var(--neon-glow); display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; color: #FFE6F1; line-height: 1; text-shadow: 0 0 4px #fff, 0 0 10px var(--buis), 0 0 22px var(--neon); animation: neonAan 1.8s ease-out both, neonZoem 5s ease-in-out 1.8s infinite alternate; }
     .logo-blend { font-size: 1.6rem; font-weight: 700; letter-spacing: 0.08em; padding-left: 0.08em; padding-bottom: 5px; border-bottom: 1.5px solid var(--buis); box-shadow: 0 6px 8px -6px var(--neon); }
     .logo-jordan { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.2em; padding-left: 0.2em; margin-top: 6px; }
     @keyframes neonAan { 0% { opacity: 0.12; } 8% { opacity: 1; } 11% { opacity: 0.25; } 18% { opacity: 1; } 21% { opacity: 0.45; } 30%, 100% { opacity: 1; } }
@@ -99,7 +100,7 @@
     @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 
     /* ── CARD ──────────────────────────────────────────── */
-    .card { background: linear-gradient(180deg, rgba(42,19,32,0.92), rgba(30,14,22,0.92)); border-radius: var(--r); padding: 26px 22px; box-shadow: var(--shadow); border: 1px solid rgba(255,95,162,0.18); backdrop-filter: blur(8px); }
+    .card { background: linear-gradient(180deg, rgba(110,32,74,0.88), rgba(82,24,56,0.90)); border-radius: var(--r); padding: 26px 22px; box-shadow: var(--shadow); border: 1px solid rgba(255,140,190,0.35); backdrop-filter: blur(8px); }
 
     /* ── TYPOGRAPHY ────────────────────────────────────── */
     .display { font-family: 'Cormorant Garamond', serif; font-size: 2.1rem; font-weight: 700; line-height: 1.12; color: #FFF4F8; }
@@ -118,7 +119,7 @@
     /* ── BUTTONS ───────────────────────────────────────── */
     .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 22px; border-radius: 50px; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.92rem; font-weight: 600; transition: transform 0.18s, box-shadow 0.18s, opacity 0.18s; width: 100%; }
     .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
-    .btn-primary { background: linear-gradient(135deg, var(--wijn) 0%, var(--neon) 100%); color: white; box-shadow: 0 0 0 1px rgba(255,140,190,0.4) inset, 0 4px 22px var(--neon-glow); text-shadow: 0 0 8px rgba(255,255,255,0.35); }
+    .btn-primary { background: linear-gradient(135deg, var(--rose) 0%, var(--neon) 100%); color: white; box-shadow: 0 0 0 1px rgba(255,140,190,0.4) inset, 0 4px 22px var(--neon-glow); text-shadow: 0 0 8px rgba(255,255,255,0.35); }
     .btn-primary:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 8px 28px var(--neon-glow); }
     .btn-ghost { background: transparent; border: 2px solid var(--border); color: var(--mauve-soft); }
     .btn-ghost:hover { border-color: var(--rose-light); color: var(--rose); }
@@ -354,7 +355,7 @@
     .beheer-punt:hover, .beheer-punt:focus-visible { color: var(--rose); }
 
     /* ── ADMIN OVERLAY ─────────────────────────────────── */
-    .admin-overlay { display: none; position: fixed; inset: 0; background: rgba(10,4,8,0.72); z-index: 300; backdrop-filter: blur(4px); align-items: flex-end; }
+    .admin-overlay { display: none; position: fixed; inset: 0; background: rgba(40,8,26,0.70); z-index: 300; backdrop-filter: blur(4px); align-items: flex-end; }
     .admin-overlay.open { display: flex; }
     .admin-sheet { background: var(--card); border-radius: 22px 22px 0 0; width: 100%; max-height: 92dvh; overflow-y: auto; padding: 16px 18px 32px; animation: slideUp 0.35s cubic-bezier(.4,0,.2,1) both; }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -448,7 +449,7 @@
     .weergave-keuze button[aria-pressed="true"] { color: var(--buis); text-decoration: none; }
 
     /* ── TELEFOONWEERGAVE ──────────────────────────────── */
-    [data-weergave="telefoon"] .site-header { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; gap: 12px; padding: calc(10px + env(safe-area-inset-top)) 16px 10px; text-align: left; background: rgba(22,10,16,0.82); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-soft); }
+    [data-weergave="telefoon"] .site-header { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; gap: 12px; padding: calc(10px + env(safe-area-inset-top)) 16px 10px; text-align: left; background: rgba(74,18,48,0.86); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-soft); }
     [data-weergave="telefoon"] .logo-blok { width: 52px; height: 52px; margin: 0; border-radius: 12px; border-width: 1.5px; }
     [data-weergave="telefoon"] .logo-blend { font-size: 0.86rem; padding-bottom: 3px; border-bottom-width: 1px; }
     [data-weergave="telefoon"] .logo-jordan { font-size: 0.42rem; margin-top: 3px; }
@@ -469,7 +470,7 @@
     [data-weergave="telefoon"] footer .ig-link { display: none; }
     [data-weergave="telefoon"] .admin-sheet { max-height: 94dvh; padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
     [data-weergave="telefoon"] .chat-input-wrap { padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
-    [data-weergave="telefoon"] .duimbalk { display: flex; position: fixed; z-index: 150; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); height: 66px; align-items: center; justify-content: space-around; padding: 0 8px; background: rgba(30,14,22,0.88); backdrop-filter: blur(14px); border: 1px solid rgba(255,95,162,0.28); border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 24px rgba(255,45,135,0.12); }
+    [data-weergave="telefoon"] .duimbalk { display: flex; position: fixed; z-index: 150; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); height: 66px; align-items: center; justify-content: space-around; padding: 0 8px; background: rgba(90,26,59,0.90); backdrop-filter: blur(14px); border: 1px solid rgba(255,140,190,0.40); border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 24px rgba(255,45,135,0.12); }
     .duim { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; height: 100%; background: none; border: 0; color: var(--mauve-soft); font-family: 'DM Sans', sans-serif; font-size: 0.68rem; font-weight: 500; text-decoration: none; cursor: pointer; }
     .duim-ico { font-size: 1.15rem; line-height: 1; }
     .duim:active { color: var(--buis); }
