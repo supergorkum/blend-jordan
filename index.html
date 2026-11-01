@@ -49,7 +49,9 @@
 
     /* ── HEADER ────────────────────────────────────────── */
     .site-header { text-align: center; padding: 20px 20px 10px; position: relative; z-index: 1; }
-    .site-header img { height: 88px; width: 88px; object-fit: cover; display: block; margin: 0 auto 6px; border-radius: 20px; box-shadow: 0 4px 24px rgba(201,75,122,0.28), 0 1px 4px rgba(0,0,0,0.08); }
+    .logo-blok { width: 96px; height: 96px; margin: 0 auto 6px; border-radius: 20px; background: #f6878b; box-shadow: 0 4px 24px rgba(201,75,122,0.28), 0 1px 4px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; color: #2b1a1d; line-height: 1; }
+    .logo-blend { font-size: 1.6rem; font-weight: 700; letter-spacing: 0.08em; padding-left: 0.08em; padding-bottom: 5px; border-bottom: 1.5px solid #2b1a1d; }
+    .logo-jordan { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.2em; padding-left: 0.2em; margin-top: 6px; }
     .logo-wrap { display: inline-flex; align-items: center; gap: 10px; }
     .logo-dot { width: 38px; height: 38px; background: linear-gradient(135deg, var(--rose), var(--neon)); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 18px var(--neon-glow); font-size: 1.1rem; }
     .logo-text { font-family: 'Cormorant Garamond', serif; font-size: 1.65rem; font-weight: 600; color: var(--rose-dark); line-height: 1; }
@@ -320,9 +322,9 @@
     .ig-link:hover { transform: translateY(-2px); }
     .footer-note { margin-top: 10px; font-size: 0.7rem; color: var(--mauve-soft); }
 
-    /* ── ADMIN BUTTON ──────────────────────────────────── */
-    .admin-trigger { position: fixed; bottom: 22px; right: 18px; width: 42px; height: 42px; background: var(--card); border: 2px solid var(--border); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; box-shadow: var(--shadow-sm); transition: all 0.2s; z-index: 100; }
-    .admin-trigger:hover { border-color: var(--rose); transform: scale(1.08); }
+    /* ── BEHEER (het puntje in de voettekst) ──────────────────────────────────── */
+    .beheer-punt { background: none; border: 0; padding: 0 4px; font: inherit; color: inherit; cursor: pointer; }
+    .beheer-punt:hover, .beheer-punt:focus-visible { color: var(--rose); }
 
     /* ── ADMIN OVERLAY ─────────────────────────────────── */
     .admin-overlay { display: none; position: fixed; inset: 0; background: rgba(45,21,32,0.65); z-index: 300; backdrop-filter: blur(4px); align-items: flex-end; }
@@ -425,7 +427,7 @@
 
 <!-- HEADER -->
 <header class="site-header">
-  <img src="data:image/png;base64,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" alt="Blend by Jordan" style="height:80px;width:80px;object-fit:cover;display:block;margin:0 auto 4px;border-radius:16px;box-shadow:0 4px 20px rgba(201,75,122,0.25)">
+  <div class="logo-blok" role="img" aria-label="Blend by Jordan"><span class="logo-blend">BLEND</span><span class="logo-jordan">X JORDAN</span></div>
   <div class="tagline">Kapsalon · Online Reserveren</div>
 </header>
 
@@ -598,10 +600,9 @@
     <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
     @blend_x_jordan
   </a>
-  <div class="footer-note">Blend by Jordan · Kapsalon</div>
+  <div class="footer-note">Blend by Jordan<button class="beheer-punt" onclick="openAdmin()" aria-label="Beheer">·</button>Kapsalon</div>
 </footer>
 
-<button class="admin-trigger" onclick="openAdmin()" title="Beheerderstoegang">🔑</button>
 
 <!-- ════ ADMIN OVERLAY ══════════════════════════════════ -->
 <div class="admin-overlay" id="adminOverlay" onclick="closeOnBack(event)">

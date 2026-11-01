@@ -69,10 +69,10 @@ Er is **geen build-stap** nodig; `netlify.toml` publiceert de root direct.
 ### Frontend (`index.html`)
 - Schermen: welkom → vragen (7 stuks) → AI-analyse → dagkiezer (weeknavigatie) → tijdslot → bevestiging
 - Alternatief instappunt: Blendy-chatbot (schaartje-knop op welkomstscherm), stelt max. 8 vragen in gespreksvorm en leidt naar dezelfde bevestigingsstap
-- Admin-portaal (sleutelknop, geen login): reserveringslijst (per week) → weekkalender → prijslijst uploaden → omzet per maand
+- Admin-portaal (het puntje in "Blend by Jordan · Kapsalon" onderaan, geen login): reserveringslijst (per week) → weekkalender → prijslijst uploaden → omzet per maand
 - Reserveringsnummer: `BL` + 4 tekens, getoond als `BLEND·XXXX`
 - Instagram-link: `https://www.instagram.com/blend_x_jordan/`
-- Logo: base64-embedded PNG (roze "BLEND X JORDAN" vierkant, border-radius 20px)
+- Logo: in HTML/CSS nagebouwd (`.logo-blok`): koraalroze vierkant met "BLEND" en "X JORDAN" in Cormorant Garamond, border-radius 20px. Het oude plaatje was 225 px met te kleine letters.
 
 ### Backend (`netlify/functions/api.js`)
 Actions die de frontend aanroept:
@@ -104,7 +104,7 @@ Actions die de frontend aanroept:
 
 - **Taal in de UI**: altijd Nederlands
 - **Reserveringscode**: formaat `BL` + 4 alfanumerieke tekens, display als `BLEND·XXXX`
-- **Geen wachtwoorden**: dit is een demo (besloten door Edgar, 1 november 2026). Het beheerportaal opent direct met de sleutelknop; er is geen login en er hoort geen wachtwoord in code, tekst of Netlify-instellingen. Komt er ooit een echte salon in productie, dan hoort toegangscontrole aan de serverkant (in `api.js`), niet in `index.html`.
+- **Geen wachtwoorden**: dit is een demo (besloten door Edgar, 1 november 2026). Het beheerportaal opent direct met het puntje in de voettekst (class `beheer-punt`, een beetje verstopt); er is geen login en er hoort geen wachtwoord in code, tekst of Netlify-instellingen. Komt er ooit een echte salon in productie, dan hoort toegangscontrole aan de serverkant (in `api.js`), niet in `index.html`.
 - **Tijden**: ochtend 09:00–12:00, middag 13:00–18:00, blokken van 30 minuten
 - **Prijslijst**: Jordan kan via het admin-portaal een Excel-prijslijst uploaden; de AI gebruikt die dan als bron
 
@@ -214,3 +214,4 @@ nooit als leeg en schrijf er niets overheen. `bouwmap.mjs` stopt er dan mee.
 | 1.0 | nov 2026 | Volledig systeem gebouwd in chat, overgezet naar Code |
 | 1.1 | 1 nov 2026 | Overstap naar Claude Code: controle en pre-push hook, bouwmap en lokale proef, onderhoudsregel op het welkomstscherm |
 | 1.2 | 1 nov 2026 | Demo zonder wachtwoorden: beheer opent direct; proef schrijft standaard niets; interne bestanden niet meer op te halen via de site |
+| 1.3 | 1 nov 2026 | Sleutelknop weg, het puntje in de voettekst opent het beheer; logo als tekst nagebouwd zodat het leesbaar is |
