@@ -192,11 +192,8 @@ nooit als leeg en schrijf er niets overheen. `bouwmap.mjs` stopt er dan mee.
   met `.git` erbij naar de Drive-map gekopieerd (`cp -a` van `.git` stopt op de
   alleen-lezen pack-bestanden; kopieer zonder rechten te bewaren). De bestanden
   waren daarna identiek aan GitHub.
-- Pushen lukt niet overal. De shell op de HUB heeft geen GitHub-inloggegevens
-  en `gh` ontbreekt. De cloudomgeving mag niet pushen naar `supergorkum/blend-jordan`
-  (de Claude GitHub-app is voor dit account niet geïnstalleerd). Pushen kan dus
-  alleen vanuit een Terminal op een Mac die bij GitHub is aangemeld, of nadat
-  de app is geïnstalleerd.
+- Pushen lukt vanuit de cloudomgeving, sinds op 1 november 2026 in claude.ai (Instellingen, Connectors) de GitHub-koppeling is vernieuwd. De shell op de HUB heeft geen GitHub-inloggegevens en geen `gh`; pushen vanaf de HUB kan dus niet. Werkwijze: commits maken op de HUB, `git bundle create .overstap/blend.bundle <laatste-origin-commit>..HEAD`, de bundel naar de cloud halen, in een kloon van de repo `git fetch <bundel> HEAD` en `git merge --ff-only FETCH_HEAD`, `git config core.hooksPath scripts/git-hooks`, `git push origin main` (de hook draait de controle). Daarna op de HUB `git fetch` en de bundel weghalen.
+- Draai nooit `pkill -f scripts/lokaal.mjs` in een opdracht waar die tekst zelf in staat: het patroon raakt dan de eigen shell (exitcode 143) en de rest van de opdracht, zoals een commit, wordt niet uitgevoerd. Zoek eerst het proces-id met `ps` en stop alleen dat.
 - De shell op de HUB en de cloud komen niet bij `*.netlify.app`. De ingebouwde
   browser wel (toegang vragen). Daarmee is het live adres gevonden.
 - `git commit` in een Drive-map met verwijderverbod laat `.git/HEAD.lock`,
@@ -206,8 +203,6 @@ nooit als leeg en schrijf er niets overheen. `bouwmap.mjs` stopt er dan mee.
 - Het beheerderswachtwoord (en de hele login) is op 1 november 2026 uit de site gehaald, op verzoek van Edgar: het is een demo. De beheeracties in `api.js` hadden toch al geen controle.
 - `netlify.toml` publiceert de hele rootmap (`publish = "."`). Daarom geven `/CLAUDE.md`, `/scripts/*`, `/package.json`, `/netlify/*` en een paar andere interne paden via redirects met `force` een 404 (`404.html`). De bestanden staan wel in de publieke GitHub-repo; zet er nooit iets in wat niet openbaar mag.
 - `OVERDRACHT-UIT-CHAT.md` staat nu in `.overstap/` (in `.gitignore`).
-
-**Openstaand na de overstap:** zie de laatste commits in `git log`. Is `git rev-list --count origin/main..HEAD` groter dan 0, dan is er nog niet gepusht. Pushen vereist de Claude GitHub-app op `supergorkum/blend-jordan` (of een aangemelde Terminal).
 
 ## Changelog
 
