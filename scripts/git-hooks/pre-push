@@ -1,0 +1,12 @@
+#!/bin/sh
+# Blend by Jordan: elke push gaat eerst door de controle (scripts/controle.mjs).
+# Een push naar main publiceert de site, dus wat hier misgaat, gaat niet naar buiten.
+# Ingesteld met: git config core.hooksPath scripts/git-hooks
+cd "$(git rev-parse --show-toplevel)" || exit 1
+# Een Mac-app start zonder het pad van Homebrew; zoek node zelf.
+PATH="$PATH:/opt/homebrew/bin:/usr/local/bin"
+if ! command -v node >/dev/null 2>&1; then
+  echo "Blend pre-push: node niet gevonden, de controle kan niet draaien. Push tegengehouden."
+  exit 1
+fi
+exec node scripts/controle.mjs --push

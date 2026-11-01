@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "blend-jordan",
+      "runtimeExecutable": "/bin/zsh",
+      "runtimeArgs": ["-lc", "PATH=\"$PATH:/opt/homebrew/bin:/usr/local/bin\" node scripts/lokaal.mjs"],
+      "port": 5174
+    }
+  ]
+}

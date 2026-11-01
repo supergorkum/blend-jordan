@@ -1,0 +1,8 @@
+node_modules
+dist
+.env
+.sleutels/
+.DS_Store
+.claude/settings.local.json
+.overstap/
+.netlify
