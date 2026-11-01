@@ -20,9 +20,9 @@ Taal: **Nederlands** (klanten en beheerder). Code en commits: Engels.
 | Framework | Geen (vanilla JS, geen build-stap) |
 | Bouwcommando | `npm install` (alleen voor `@netlify/blobs`) |
 | Hosting | Netlify |
-| GitHub-repo | `supergorkum/blend-jordan` (of gelijknamig) |
+| GitHub-repo | `supergorkum/blend-jordan` (bevestigd 1 nov 2026, publiek) |
 | Productietak | `main` |
-| Live adres | Zie Netlify-dashboard (nog niet vastgelegd) |
+| Live adres | https://vermillion-sawine-41235a.netlify.app |
 | Opslag | Netlify Blobs, store-naam: `blend-jordan` |
 | AI-model | `claude-haiku-4-5-20251001` via Anthropic API |
 
@@ -118,11 +118,103 @@ git pull origin main
 cat package.json | grep version
 git log --oneline -5
 git status
+ls -l scripts/git-hooks/pre-push   # moet uitvoerbaar zijn (x), anders: chmod +x
 ```
 
-Controleer daarna of er nog iets openstaat in `OVERDRACHT-UIT-CHAT.md`.
+Het overdrachtsbestand van de chat staat in `.overstap/OVERDRACHT-UIT-CHAT.md` (niet in git). Wat daarin blijvend geldt, staat in dit bestand.
 
 ---
+
+## Werken in Claude Code (sinds 1 november 2026)
+
+Een push naar `main` op GitHub (`supergorkum/blend-jordan`, publiek) publiceert de
+site: Netlify haalt de repo op, draait `npm install` en zet de map zoals hij is
+live. Er is geen bouwstap. Live adres: https://vermillion-sawine-41235a.netlify.app
+(Netlify-project `vermillion-sawine-41235a`; de naam is een willekeurige
+Netlify-naam, niet "blend").
+
+**Bouwen en proberen gebeurt buiten Google Drive.** Er staat geen `node_modules`
+in de projectmap. De controle en de proef draaien in een kopie,
+standaard `~/Developer/blend-jordan-build`, die `scripts/bouwmap.mjs` bijhoudt.
+Werken doe je altijd in de projectmap; de bouwmap is wegwerp. Draai nooit
+`npm install` in de projectmap zelf.
+
+- `npm run controle`: versie en changelog, onderhoudsregel, syntaxis van
+  `api.js` en van de scripts in `index.html`, verwijzen alle knoppen naar een
+  bestaande functie, kloppen de mappen in `netlify.toml`, staan er geen sleutels
+  in de bestanden. Duurt een paar seconden. Wat de controle niet kan: de site
+  draaien, de AI of Netlify Blobs aanroepen, het uiterlijk beoordelen. Er is geen
+  eslint en geen testset.
+- `npm run lokaal`: de site op http://127.0.0.1:5174, ook als preview in Code
+  (`.claude/launch.json`). Wijzigingen in de projectmap lopen vanzelf mee. De
+  aanroepen naar `/.netlify/functions` gaan naar de LIVE site met de ECHTE
+  reserveringen: kijken mag, een boeking of verwijdering in de proef verandert
+  echte gegevens.
+- `npm run bouwmap`: alleen de bouwmap bijwerken.
+
+**Elke push gaat eerst door de controle.** `scripts/git-hooks/pre-push` draait
+`npm run controle` met een extra stap: raakt de push `index.html` of `netlify/`,
+dan moeten de versie in `package.json` en de changelog hierboven mee veranderen.
+Ingesteld met `git config core.hooksPath scripts/git-hooks`; dat staat in
+`.git/config` en reist via Drive mee. Google Drive bewaart het uitvoerbit niet
+altijd. **Kijk bij de start van elke sessie na** dat
+`scripts/git-hooks/pre-push` uitvoerbaar is (`ls -l`), en zet het zo nodig
+terug met `chmod +x`. `git push --no-verify` alleen als Edgar daar zelf om
+vraagt.
+
+**Een wijziging in Code** gaat zo:
+
+1. `index.html` en/of `netlify/functions/api.js` rechtstreeks aanpassen.
+2. Versie omhoog in `package.json` en een nieuwe rij in de changelog onderaan.
+3. `npm run controle`, en bij iets zichtbaars de proef bekijken.
+4. Commit in het Engels, `git push`.
+5. De deploy nakijken en Edgar kort melden wat er live staat.
+
+**De deploy nakijken.** Wacht ongeveer een minuut en lees dan de live pagina,
+bijvoorbeeld met `curl -s https://vermillion-sawine-41235a.netlify.app/ | grep
+"onderhoud: Claude Code"`. Zoek op een tekst die alleen in de nieuwe versie
+staat, niet op een versienummer. De pagina toont geen versienummer.
+
+**Onderhoudsregel.** Onderaan het welkomstscherm staat in kleine letters
+"onderhoud: Claude Code · 2026" (class `onderhoudsregel`). De site is alleen
+Nederlands, dus er is een taal. De controle faalt als de regel ontbreekt.
+
+**Niet tegelijk op twee computers.** Git draait in een Google Drive-map. Bij
+wisselen van computer eerst `git pull`. Bestanden die alleen online staan,
+geeft Drive soms als bestand met de juiste omvang en alleen nullen: lees dat
+nooit als leeg en schrijf er niets overheen. `bouwmap.mjs` stopt er dan mee.
+
+**Wat tijdens de overstap is geleerd (1 november 2026):**
+
+- De projectmap bevatte bij de start alleen `CLAUDE.md` en de overdracht. De
+  code is opgehaald met `git clone` van GitHub in een tijdelijke map en daarna
+  met `.git` erbij naar de Drive-map gekopieerd (`cp -a` van `.git` stopt op de
+  alleen-lezen pack-bestanden; kopieer zonder rechten te bewaren). De bestanden
+  waren daarna identiek aan GitHub.
+- Pushen lukt niet overal. De shell op de HUB heeft geen GitHub-inloggegevens
+  en `gh` ontbreekt. De cloudomgeving mag niet pushen naar `supergorkum/blend-jordan`
+  (de Claude GitHub-app is voor dit account niet geïnstalleerd). Pushen kan dus
+  alleen vanuit een Terminal op een Mac die bij GitHub is aangemeld, of nadat
+  de app is geïnstalleerd.
+- De shell op de HUB en de cloud komen niet bij `*.netlify.app`. De ingebouwde
+  browser wel (toegang vragen). Daarmee is het live adres gevonden.
+- `git commit` in een Drive-map met verwijderverbod laat `.git/HEAD.lock`,
+  `objects/maintenance.lock` en `objects/*/tmp_obj_*` achter. Na toestemming om
+  te verwijderen zijn alleen die restanten weggehaald. Zonder toestemming:
+  `mv .git/HEAD.lock .git/stale-HEAD-lock`.
+- Het beheerderswachtwoord staat leesbaar in `index.html` (zoek op `doLogin`) en
+  de repo is publiek. Dat is niet aangepast, want weghalen breekt de inlog.
+  Verplaatsen naar een controle aan de serverkant is een verbetering voor later,
+  in overleg met Jordan.
+- `netlify.toml` publiceert de hele rootmap (`publish = "."`). Alles wat in de
+  repo staat, is dus ook via de site op te halen, ook `CLAUDE.md`, `scripts/` en
+  `package.json`. Er staan geen sleutels in. Zet er nooit iets in wat niet
+  openbaar mag.
+- `OVERDRACHT-UIT-CHAT.md` staat nu in `.overstap/` (in `.gitignore`).
+
+**Openstaand na de overstap:** commit `a24755f` (1.1) en de commit met dit
+kopje staan alleen nog lokaal. Zodra ze zijn gepusht en live gecontroleerd,
+deze alinea weghalen.
 
 ## Changelog
 
