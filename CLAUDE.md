@@ -194,8 +194,11 @@ nooit als leeg en schrijf er niets overheen. `bouwmap.mjs` stopt er dan mee.
   waren daarna identiek aan GitHub.
 - Pushen lukt vanuit de cloudomgeving, sinds op 1 november 2026 in claude.ai (Instellingen, Connectors) de GitHub-koppeling is vernieuwd. De shell op de HUB heeft geen GitHub-inloggegevens en geen `gh`; pushen vanaf de HUB kan dus niet. Werkwijze: commits maken op de HUB, `git bundle create .overstap/blend.bundle <laatste-origin-commit>..HEAD`, de bundel naar de cloud halen, in een kloon van de repo `git fetch <bundel> HEAD` en `git merge --ff-only FETCH_HEAD`, `git config core.hooksPath scripts/git-hooks`, `git push origin main` (de hook draait de controle). Daarna op de HUB `git fetch` en de bundel weghalen.
 - Draai nooit `pkill -f scripts/lokaal.mjs` in een opdracht waar die tekst zelf in staat: het patroon raakt dan de eigen shell (exitcode 143) en de rest van de opdracht, zoals een commit, wordt niet uitgevoerd. Zoek eerst het proces-id met `ps` en stop alleen dat.
-- De shell op de HUB en de cloud komen niet bij `*.netlify.app`. De ingebouwde
-  browser wel (toegang vragen). Daarmee is het live adres gevonden.
+- Tijdens de overstap kwam de shell op de HUB en in de cloud niet bij
+  `*.netlify.app`; het live adres is toen met de ingebouwde browser gevonden.
+  Sinds 1 november 2026 (later die dag) lukt `curl` naar de live site vanaf de
+  HUB wel, dus de deploy is gewoon met `curl` na te kijken. Lukt dat ooit weer
+  niet, gebruik dan de ingebouwde browser (toegang vragen).
 - `git commit` in een Drive-map met verwijderverbod laat `.git/HEAD.lock`,
   `objects/maintenance.lock` en `objects/*/tmp_obj_*` achter. Na toestemming om
   te verwijderen zijn alleen die restanten weggehaald. Zonder toestemming:
