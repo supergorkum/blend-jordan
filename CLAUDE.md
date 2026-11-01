@@ -72,7 +72,9 @@ Er is **geen build-stap** nodig; `netlify.toml` publiceert de root direct.
 - Admin-portaal (het puntje in "Blend by Jordan · Kapsalon" onderaan, geen login): reserveringslijst (per week) → weekkalender → prijslijst uploaden → omzet per maand
 - Reserveringsnummer: `BL` + 4 tekens, getoond als `BLEND·XXXX`
 - Instagram-link: `https://www.instagram.com/blend_x_jordan/`
-- Logo: in HTML/CSS nagebouwd (`.logo-blok`): koraalroze vierkant met "BLEND" en "X JORDAN" in Cormorant Garamond, border-radius 20px. Het oude plaatje was 225 px met te kleine letters.
+- Logo: in HTML/CSS nagebouwd (`.logo-blok`) als neonbord: "BLEND" en "X JORDAN" in Cormorant Garamond met roze gloed, flikkert bij het laden aan. Het oude plaatje was 225 px met te kleine letters.
+- Stijl sinds 1.4: "Neon na sluitingstijd" (door Edgar gekozen uit vier richtingen). Donker mauve met neonroze; alle kleuren lopen via de variabelen in `:root`. `--rose-dark` is nu een lichte kopkleur; voor vlakken met witte tekst (ticket, omzet, toast) is er `--wijn`. Bewegingen staan uit bij `prefers-reduced-motion`.
+- Twee weergaven, zoals bij Sepupu: `telefoon` en `computer`, op `<html data-weergave>`. Het scriptje in `<head>` kiest op de kortste vensterzijde (< 600) plus een grove aanwijzer; de keuze van de bezoeker onderaan ("Weergave: telefoon · computer", `localStorage` `blend-weergave`) wint altijd. De telefoon krijgt een vaste kopbalk, grotere raakvlakken, invoer op 16px (geen inzoomen op iPhone) en een duimbalk met Opnieuw, Blendy en Instagram.
 
 ### Backend (`netlify/functions/api.js`)
 Actions die de frontend aanroept:
@@ -215,3 +217,4 @@ nooit als leeg en schrijf er niets overheen. `bouwmap.mjs` stopt er dan mee.
 | 1.1 | 1 nov 2026 | Overstap naar Claude Code: controle en pre-push hook, bouwmap en lokale proef, onderhoudsregel op het welkomstscherm |
 | 1.2 | 1 nov 2026 | Demo zonder wachtwoorden: beheer opent direct; proef schrijft standaard niets; interne bestanden niet meer op te halen via de site |
 | 1.3 | 1 nov 2026 | Sleutelknop weg, het puntje in de voettekst opent het beheer; logo als tekst nagebouwd zodat het leesbaar is |
+| 1.4 | 1 nov 2026 | Nieuw jasje "Neon na sluitingstijd": donker thema met neonbord-logo; telefoonweergave met duimbalk en eigen weergavekeuze |

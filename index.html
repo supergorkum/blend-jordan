@@ -3,35 +3,58 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#160A10">
   <title>Blend by Jordan — Reserveren</title>
+  <script>
+    // Weergave: telefoon of computer. Kortste vensterzijde plus grove aanwijzer,
+    // zoals bij Sepupu; een eigen keuze van de bezoeker wint altijd.
+    (function () {
+      var keuze = null;
+      try { keuze = localStorage.getItem('blend-weergave'); } catch (e) {}
+      if (keuze !== 'telefoon' && keuze !== 'computer') {
+        var kort = Math.min(window.innerWidth, window.innerHeight);
+        var grof = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+        keuze = (kort < 600 && grof) ? 'telefoon' : 'computer';
+      }
+      document.documentElement.dataset.weergave = keuze;
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --blush:       #FFF0F5;
-      --blush-mid:   #FAD8E8;
-      --card:        #FFFFFF;
-      --rose:        #C94B7A;
+      color-scheme: dark;
+      --nacht:       #160A10;
+      --blush:       #1E0E16;
+      --blush-mid:   #2A1320;
+      --card:        #241019;
+      --rose:        #FF5FA2;
       --rose-light:  #E27DA0;
-      --rose-dark:   #8C2A52;
+      --rose-dark:   #FFD3E5;
+      --wijn:        #8C2A52;
       --neon:        #FF2D87;
-      --neon-glow:   rgba(255, 45, 135, 0.22);
-      --mauve:       #2D1520;
-      --mauve-soft:  #7A4060;
-      --border:      #F0C4D8;
-      --border-soft: #FAE4EF;
+      --neon-glow:   rgba(255, 45, 135, 0.38);
+      --buis:        #FF8CBE;
+      --mauve:       #F8E6EE;
+      --mauve-soft:  #C99AB2;
+      --border:      #4A2234;
+      --border-soft: #3A1A29;
       --success:     #48A999;
       --warn:        #E09040;
-      --shadow:      0 8px 40px rgba(180, 50, 100, 0.13);
-      --shadow-sm:   0 2px 12px rgba(180, 50, 100, 0.08);
+      --shadow:      0 24px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 95, 162, 0.10);
+      --shadow-sm:   0 4px 16px rgba(0, 0, 0, 0.40);
       --r:           18px;
     }
 
     body {
       font-family: 'DM Sans', sans-serif;
-      background: var(--blush);
+      background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 45, 135, 0.20), transparent 70%),
+        radial-gradient(ellipse 60% 40% at 0% 100%, rgba(140, 42, 82, 0.35), transparent 70%),
+        var(--nacht);
+      background-attachment: fixed;
       color: var(--mauve);
       min-height: 100dvh;
       display: flex;
@@ -49,14 +72,18 @@
 
     /* ── HEADER ────────────────────────────────────────── */
     .site-header { text-align: center; padding: 20px 20px 10px; position: relative; z-index: 1; }
-    .logo-blok { width: 96px; height: 96px; margin: 0 auto 6px; border-radius: 20px; background: #f6878b; box-shadow: 0 4px 24px rgba(201,75,122,0.28), 0 1px 4px rgba(0,0,0,0.08); display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; color: #2b1a1d; line-height: 1; }
-    .logo-blend { font-size: 1.6rem; font-weight: 700; letter-spacing: 0.08em; padding-left: 0.08em; padding-bottom: 5px; border-bottom: 1.5px solid #2b1a1d; }
+    .logo-blok { width: 104px; height: 104px; margin: 0 auto 8px; border-radius: 20px; background: rgba(22,10,16,0.6); border: 2px solid var(--buis); box-shadow: 0 0 6px var(--buis), 0 0 22px var(--neon-glow), inset 0 0 14px var(--neon-glow); display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; color: #FFE6F1; line-height: 1; text-shadow: 0 0 4px #fff, 0 0 10px var(--buis), 0 0 22px var(--neon); animation: neonAan 1.8s ease-out both, neonZoem 5s ease-in-out 1.8s infinite alternate; }
+    .logo-blend { font-size: 1.6rem; font-weight: 700; letter-spacing: 0.08em; padding-left: 0.08em; padding-bottom: 5px; border-bottom: 1.5px solid var(--buis); box-shadow: 0 6px 8px -6px var(--neon); }
     .logo-jordan { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.2em; padding-left: 0.2em; margin-top: 6px; }
+    @keyframes neonAan { 0% { opacity: 0.12; } 8% { opacity: 1; } 11% { opacity: 0.25; } 18% { opacity: 1; } 21% { opacity: 0.45; } 30%, 100% { opacity: 1; } }
+    @keyframes neonZoem { from { box-shadow: 0 0 6px var(--buis), 0 0 22px var(--neon-glow), inset 0 0 14px var(--neon-glow); } to { box-shadow: 0 0 8px var(--buis), 0 0 34px var(--neon-glow), inset 0 0 20px var(--neon-glow); } }
     .logo-wrap { display: inline-flex; align-items: center; gap: 10px; }
     .logo-dot { width: 38px; height: 38px; background: linear-gradient(135deg, var(--rose), var(--neon)); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 18px var(--neon-glow); font-size: 1.1rem; }
     .logo-text { font-family: 'Cormorant Garamond', serif; font-size: 1.65rem; font-weight: 600; color: var(--rose-dark); line-height: 1; }
     .logo-text em { font-style: italic; color: var(--neon); text-shadow: 0 0 24px var(--neon-glow); }
-    .tagline { font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mauve-soft); margin-top: 6px; }
+    .tagline { font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--rose-light); margin-top: 8px; display: inline-flex; align-items: center; gap: 8px; }
+    .open-lamp { width: 7px; height: 7px; border-radius: 50%; background: var(--neon); box-shadow: 0 0 6px var(--neon), 0 0 12px var(--neon); animation: lampje 2.4s ease-in-out infinite; }
+    @keyframes lampje { 50% { opacity: 0.45; } }
 
     /* ── PROGRESS ──────────────────────────────────────── */
     .progress-wrap { padding: 0 20px; position: relative; z-index: 1; }
@@ -72,11 +99,11 @@
     @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 
     /* ── CARD ──────────────────────────────────────────── */
-    .card { background: var(--card); border-radius: var(--r); padding: 26px 22px; box-shadow: var(--shadow); border: 1px solid var(--border-soft); }
+    .card { background: linear-gradient(180deg, rgba(42,19,32,0.92), rgba(30,14,22,0.92)); border-radius: var(--r); padding: 26px 22px; box-shadow: var(--shadow); border: 1px solid rgba(255,95,162,0.18); backdrop-filter: blur(8px); }
 
     /* ── TYPOGRAPHY ────────────────────────────────────── */
-    .display { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 700; line-height: 1.15; color: var(--rose-dark); }
-    .display em { font-style: italic; color: var(--neon); text-shadow: 0 0 20px var(--neon-glow); }
+    .display { font-family: 'Cormorant Garamond', serif; font-size: 2.1rem; font-weight: 700; line-height: 1.12; color: #FFF4F8; }
+    .display em { font-style: italic; color: var(--buis); text-shadow: 0 0 6px var(--neon), 0 0 22px var(--neon); }
     h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.45rem; font-weight: 600; color: var(--rose-dark); margin-bottom: 6px; }
     p { color: var(--mauve-soft); line-height: 1.6; font-size: 0.9rem; }
     .label-caps { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--rose); }
@@ -85,13 +112,13 @@
     .field { margin: 20px 0; }
     .field label { display: block; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--mauve-soft); margin-bottom: 8px; }
     .field input { width: 100%; padding: 14px 18px; border: 2px solid var(--border); border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--mauve); background: var(--blush); outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
-    .field input:focus { border-color: var(--rose); box-shadow: 0 0 0 3px rgba(201,75,122,0.12); }
+    .field input:focus { border-color: var(--rose); box-shadow: 0 0 0 3px rgba(255,45,135,0.18), 0 0 18px var(--neon-glow); }
     .field input::placeholder { color: var(--mauve-soft); opacity: 0.55; }
 
     /* ── BUTTONS ───────────────────────────────────────── */
     .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 22px; border-radius: 50px; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: 0.92rem; font-weight: 600; transition: transform 0.18s, box-shadow 0.18s, opacity 0.18s; width: 100%; }
     .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none !important; }
-    .btn-primary { background: linear-gradient(135deg, var(--rose) 0%, var(--neon) 100%); color: white; box-shadow: 0 4px 18px var(--neon-glow); }
+    .btn-primary { background: linear-gradient(135deg, var(--wijn) 0%, var(--neon) 100%); color: white; box-shadow: 0 0 0 1px rgba(255,140,190,0.4) inset, 0 4px 22px var(--neon-glow); text-shadow: 0 0 8px rgba(255,255,255,0.35); }
     .btn-primary:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 8px 28px var(--neon-glow); }
     .btn-ghost { background: transparent; border: 2px solid var(--border); color: var(--mauve-soft); }
     .btn-ghost:hover { border-color: var(--rose-light); color: var(--rose); }
@@ -129,7 +156,7 @@
       position: absolute; top: -2px; right: -2px;
       width: 14px; height: 14px;
       background: var(--success);
-      border-radius: 50%; border: 2px solid white;
+      border-radius: 50%; border: 2px solid var(--card);
     }
     .blendy-option-info { flex: 1; }
     .blendy-option-title { font-weight: 700; font-size: 0.95rem; color: var(--rose-dark); }
@@ -185,7 +212,7 @@
     /* ── CONFIRM ───────────────────────────────────────── */
     .confirm-top { text-align: center; margin-bottom: 16px; }
     .confetti { font-size: 2.6rem; display: block; margin-bottom: 8px; }
-    .res-ticket { background: linear-gradient(135deg, var(--rose-dark), var(--rose)); border-radius: 16px; padding: 20px; text-align: center; margin: 16px 0; position: relative; overflow: hidden; }
+    .res-ticket { background: linear-gradient(135deg, var(--wijn), var(--neon)); box-shadow: 0 0 30px var(--neon-glow); border-radius: 16px; padding: 20px; text-align: center; margin: 16px 0; position: relative; overflow: hidden; }
     .res-ticket::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at top right, rgba(255,45,135,0.35), transparent 60%); }
     .ticket-label { font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.75); margin-bottom: 6px; position: relative; }
     .ticket-number { font-family: 'Cormorant Garamond', serif; font-size: 2.6rem; font-weight: 700; color: white; letter-spacing: 0.08em; position: relative; }
@@ -327,7 +354,7 @@
     .beheer-punt:hover, .beheer-punt:focus-visible { color: var(--rose); }
 
     /* ── ADMIN OVERLAY ─────────────────────────────────── */
-    .admin-overlay { display: none; position: fixed; inset: 0; background: rgba(45,21,32,0.65); z-index: 300; backdrop-filter: blur(4px); align-items: flex-end; }
+    .admin-overlay { display: none; position: fixed; inset: 0; background: rgba(10,4,8,0.72); z-index: 300; backdrop-filter: blur(4px); align-items: flex-end; }
     .admin-overlay.open { display: flex; }
     .admin-sheet { background: var(--card); border-radius: 22px 22px 0 0; width: 100%; max-height: 92dvh; overflow-y: auto; padding: 16px 18px 32px; animation: slideUp 0.35s cubic-bezier(.4,0,.2,1) both; }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -359,7 +386,7 @@
 
     /* Omzet */
     .omzet-total {
-      background: linear-gradient(135deg, var(--rose-dark), var(--rose));
+      background: linear-gradient(135deg, var(--wijn), var(--neon));
       border-radius: 16px; padding: 20px; text-align: center; margin-bottom: 16px; color: white;
     }
     .omzet-total-label { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.82; margin-bottom: 6px; }
@@ -411,8 +438,47 @@
     .search-input:focus { border-color: var(--rose); }
 
     /* Toast */
-    .toast { position: fixed; top: 18px; left: 50%; transform: translateX(-50%) translateY(-70px); background: var(--rose-dark); color: white; padding: 11px 22px; border-radius: 50px; font-size: 0.85rem; font-weight: 500; z-index: 999; transition: transform 0.3s cubic-bezier(.4,0,.2,1); white-space: nowrap; box-shadow: 0 4px 18px rgba(45,21,32,0.25); }
+    .toast { position: fixed; top: 18px; left: 50%; transform: translateX(-50%) translateY(-70px); background: var(--wijn); color: white; padding: 11px 22px; border-radius: 50px; font-size: 0.85rem; font-weight: 500; z-index: 999; transition: transform 0.3s cubic-bezier(.4,0,.2,1); white-space: nowrap; box-shadow: 0 4px 18px rgba(45,21,32,0.25); }
     .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* ── DUIMBALK (alleen in de telefoonweergave) ─────── */
+    .duimbalk { display: none; }
+    .weergave-keuze { margin-top: 6px; font-size: 0.65rem; color: var(--mauve-soft); opacity: 0.7; }
+    .weergave-keuze button { background: none; border: 0; font: inherit; color: inherit; cursor: pointer; padding: 2px 3px; text-decoration: underline; text-underline-offset: 2px; }
+    .weergave-keuze button[aria-pressed="true"] { color: var(--buis); text-decoration: none; }
+
+    /* ── TELEFOONWEERGAVE ──────────────────────────────── */
+    [data-weergave="telefoon"] .site-header { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; gap: 12px; padding: calc(10px + env(safe-area-inset-top)) 16px 10px; text-align: left; background: rgba(22,10,16,0.82); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-soft); }
+    [data-weergave="telefoon"] .logo-blok { width: 52px; height: 52px; margin: 0; border-radius: 12px; border-width: 1.5px; }
+    [data-weergave="telefoon"] .logo-blend { font-size: 0.86rem; padding-bottom: 3px; border-bottom-width: 1px; }
+    [data-weergave="telefoon"] .logo-jordan { font-size: 0.42rem; margin-top: 3px; }
+    [data-weergave="telefoon"] .tagline { margin: 0; font-size: 0.68rem; letter-spacing: 0.14em; }
+    [data-weergave="telefoon"] .progress-wrap { padding: 0; }
+    [data-weergave="telefoon"] .progress-track { border-radius: 0; }
+    [data-weergave="telefoon"] main { padding: 14px 12px calc(110px + env(safe-area-inset-bottom)); }
+    [data-weergave="telefoon"] .card { padding: 24px 18px; border-radius: 22px; }
+    [data-weergave="telefoon"] .display { font-size: 2.2rem; }
+    [data-weergave="telefoon"] .field input,
+    [data-weergave="telefoon"] .chat-input,
+    [data-weergave="telefoon"] .search-input { font-size: 16px; }
+    [data-weergave="telefoon"] .btn { padding: 16px 22px; font-size: 1rem; }
+    [data-weergave="telefoon"] .pill { min-height: 54px; font-size: 0.95rem; }
+    [data-weergave="telefoon"] .slot { padding: 15px 6px; font-size: 0.95rem; }
+    [data-weergave="telefoon"] .day-card { padding: 16px 12px; }
+    [data-weergave="telefoon"] footer { padding-bottom: calc(110px + env(safe-area-inset-bottom)); }
+    [data-weergave="telefoon"] footer .ig-link { display: none; }
+    [data-weergave="telefoon"] .admin-sheet { max-height: 94dvh; padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+    [data-weergave="telefoon"] .chat-input-wrap { padding-bottom: calc(14px + env(safe-area-inset-bottom)); }
+    [data-weergave="telefoon"] .duimbalk { display: flex; position: fixed; z-index: 150; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); height: 66px; align-items: center; justify-content: space-around; padding: 0 8px; background: rgba(30,14,22,0.88); backdrop-filter: blur(14px); border: 1px solid rgba(255,95,162,0.28); border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 24px rgba(255,45,135,0.12); }
+    .duim { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; height: 100%; background: none; border: 0; color: var(--mauve-soft); font-family: 'DM Sans', sans-serif; font-size: 0.68rem; font-weight: 500; text-decoration: none; cursor: pointer; }
+    .duim-ico { font-size: 1.15rem; line-height: 1; }
+    .duim:active { color: var(--buis); }
+    .duim-blendy .duim-ico { width: 52px; height: 52px; margin-top: -30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; background: linear-gradient(135deg, var(--wijn), var(--neon)); box-shadow: 0 0 0 4px var(--nacht), 0 0 22px var(--neon-glow); }
+    .duim-blendy { color: var(--buis); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .logo-blok, .open-lamp { animation: none; }
+    }
 
     @media (max-width: 400px) {
       .day-grid { grid-template-columns: 1fr; }
@@ -428,7 +494,7 @@
 <!-- HEADER -->
 <header class="site-header">
   <div class="logo-blok" role="img" aria-label="Blend by Jordan"><span class="logo-blend">BLEND</span><span class="logo-jordan">X JORDAN</span></div>
-  <div class="tagline">Kapsalon · Online Reserveren</div>
+  <div class="tagline"><span class="open-lamp" aria-hidden="true"></span>Kapsalon · Online Reserveren</div>
 </header>
 
 <div class="progress-wrap">
@@ -601,7 +667,15 @@
     @blend_x_jordan
   </a>
   <div class="footer-note">Blend by Jordan<button class="beheer-punt" onclick="openAdmin()" aria-label="Beheer">·</button>Kapsalon</div>
+  <div class="weergave-keuze">Weergave: <button onclick="kiesWeergave('telefoon')" data-weergave-knop="telefoon">telefoon</button> · <button onclick="kiesWeergave('computer')" data-weergave-knop="computer">computer</button></div>
 </footer>
+
+<!-- DUIMBALK: alleen zichtbaar in de telefoonweergave -->
+<nav class="duimbalk" aria-label="Snelmenu">
+  <button class="duim" onclick="reset()"><span class="duim-ico">↺</span>Opnieuw</button>
+  <button class="duim duim-blendy" onclick="duimBlendy()"><span class="duim-ico">✂️</span>Blendy</button>
+  <a class="duim" href="https://www.instagram.com/blend_x_jordan/" target="_blank" rel="noopener"><span class="duim-ico">◎</span>Instagram</a>
+</nav>
 
 
 <!-- ════ ADMIN OVERLAY ══════════════════════════════════ -->
@@ -708,6 +782,28 @@ function show(id) {
   if (el && el.classList.contains('screen')) el.classList.add('active');
   window.scrollTo({ top:0, behavior:'smooth' });
 }
+
+function kiesWeergave(w) {
+  try { localStorage.setItem('blend-weergave', w); } catch (e) {}
+  document.documentElement.dataset.weergave = w;
+  markeerWeergave();
+}
+function markeerWeergave() {
+  const w = document.documentElement.dataset.weergave;
+  document.querySelectorAll('[data-weergave-knop]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.weergaveKnop === w)));
+}
+// Blendy vanuit de duimbalk: zonder naam eerst terug naar het naamveld.
+function duimBlendy() {
+  const inp = document.getElementById('clientName');
+  if (!inp.value.trim()) {
+    show('s-welcome');
+    toast('Vul eerst je naam in 😊');
+    setTimeout(() => inp.focus(), 350);
+    return;
+  }
+  startBlendy();
+}
+document.addEventListener('DOMContentLoaded', markeerWeergave);
 
 function progress(p) { document.getElementById('progressFill').style.width = p + '%'; }
 
